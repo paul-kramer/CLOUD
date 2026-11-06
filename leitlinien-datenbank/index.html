@@ -126,6 +126,28 @@ mark { background: var(--mark); color: inherit; border-radius: 2px; padding: 0 1
 .cov.n { background: var(--warn-bg); color: var(--warn); }
 .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: .85rem; color: var(--muted); align-items: center; }
 
+/* Ansicht Volltext */
+.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: .95rem; }
+.drop { border: 2px dashed var(--line); border-radius: var(--r); background: var(--surface); padding: 18px 16px; display: grid; gap: 10px; }
+.drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.drop b { font: 700 1.15rem/1.2 var(--f-display); text-transform: uppercase; letter-spacing: .04em; }
+.drop .row { display: flex; flex-wrap: wrap; gap: 8px; }
+.drop label.btn { cursor: pointer; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.prog { font: 500 .85rem/1.45 var(--f-num); color: var(--muted); overflow-wrap: anywhere; margin: 0; }
+.prog.err { color: var(--bad); }
+.dl { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 16px; }
+.dl summary { cursor: pointer; font: 700 1rem/1.4 var(--f-display); text-transform: uppercase; letter-spacing: .05em; }
+.dlrow { display: flex; gap: 8px 10px; align-items: baseline; flex-wrap: wrap; padding: 7px 0; border-top: 1px solid var(--line); font-size: .92rem; min-width: 0; }
+.dlrow:first-of-type { border-top: 0; }
+.dlrow .tt { flex: 1 1 240px; min-width: 0; overflow-wrap: anywhere; }
+.have { font: 700 .72rem/1 var(--f-num); padding: 3px 6px; border-radius: 4px; background: var(--ok-bg); color: var(--ok); }
+.miss { font: 700 .72rem/1 var(--f-num); padding: 3px 6px; border-radius: 4px; background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.hitdoc { background: var(--surface); padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+.hitpg { display: grid; gap: 3px; padding-left: 12px; border-left: 3px solid var(--accent-soft); min-width: 0; }
+.hitpg .pg { font: 600 .85rem/1.3 var(--f-num); color: var(--accent); justify-self: start; }
+.snip { margin: 0; font-size: .92rem; overflow-wrap: anywhere; color: var(--ink); }
+.more { justify-self: start; }
 footer { font-size: .82rem; color: var(--muted); display: grid; gap: 6px; }
 @media (prefers-reduced-motion: no-preference) { .chip, .btn { transition: background .12s, border-color .12s; } }
 </style>
@@ -140,6 +162,7 @@ footer { font-size: .82rem; color: var(--muted); display: grid; gap: 6px; }
     <nav class="views" aria-label="Ansicht">
       <a href="#suche" data-view="suche">Suche</a>
       <a href="#notfallbilder" data-view="notfallbilder">Nach Notfallbild</a>
+      <a href="#volltext" data-view="volltext">Volltext</a>
     </nav>
   </div>
 </header>
@@ -471,7 +494,7 @@ const nfById = Object.fromEntries(NF.map(n => [n.id, n]));
 function norm(s) {
   return (s || "").toLowerCase()
     .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
-    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[–—\/]/g, "-");
 }
 function searchText(l) {
@@ -562,7 +585,7 @@ function renderSearch() {
   const cats = [...new Set(NF.map(n => n.cat))];
   const any = state.q || state.tags.size || state.nf || state.kl.size || state.hideOld;
   view.innerHTML = `
-    <p class="notice"><strong>So funktioniert die Suche:</strong> Freitext durchsucht Titel, Kurzbeschreibung, Schlagworte, Registernummer und die zugeordneten Notfallbilder. Mehrere Wörter müssen alle vorkommen. Den Volltext der PDFs durchsucht sie nicht: Das AWMF-Register erlaubt keinen automatisierten Abruf.</p>
+    <p class="notice"><strong>So funktioniert die Suche:</strong> Freitext durchsucht Titel, Kurzbeschreibung, Schlagworte, Registernummer und die zugeordneten Notfallbilder. Mehrere Wörter müssen alle vorkommen. Den kompletten Text der Leitlinien durchsuchst du in der Ansicht <a href="#volltext">Volltext</a>, nachdem du die PDFs dort geladen hast.</p>
     <section class="filters" aria-label="Filter">
       <div class="frow"><span class="flab">Notfallbild</span>
         <select class="sel" id="nfsel" aria-label="Notfallbild aus dem Kompendium">
@@ -627,17 +650,232 @@ function renderNF() {
   view.querySelectorAll("[data-gonf]").forEach(b => b.addEventListener("click", () => { state.nf = b.dataset.gonf; state.q = ""; q.value = ""; location.hash = "suche"; }));
 }
 
+// ─────────────────────────────────────────────────────────────
+// Volltext: PDFs werden im Browser gelesen (pdf.js), der Text bleibt lokal in IndexedDB.
+// ─────────────────────────────────────────────────────────────
+const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+const ALIAS = { "asthma-vers5": "nvl-002", "herzinsuffizienz-vers4": "nvl-006", "hypertonie-vers1": "nvl-009" };
+const llByNr = Object.fromEntries(LL.map(l => [l.nr, l]));
+function nrFromName(name) {
+  const b = name.toLowerCase();
+  for (const k in ALIAS) if (b.includes(k)) return ALIAS[k];
+  const m = b.match(/(nvl-\d{3}|\d{3}-\d{3})/);
+  return m && llByNr[m[1]] ? m[1] : (m ? m[1] : "");
+}
+const FT = { docs: [], busy: false, msg: "", err: "", ready: false, open: {} };
+
+let dbP = null;
+function db() {
+  if (!dbP) dbP = new Promise((res, rej) => {
+    try { const r = indexedDB.open("ll-volltext", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("docs", { keyPath: "name" });
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+    } catch (e) { rej(e); }
+  });
+  return dbP;
+}
+async function dbAll() { try { const d = await db(); return await new Promise((res, rej) => { const r = d.transaction("docs").objectStore("docs").getAll(); r.onsuccess = () => res(r.result || []); r.onerror = () => rej(r.error); }); } catch (e) { return []; } }
+async function dbPut(doc) { try { const d = await db(); await new Promise((res, rej) => { const t = d.transaction("docs", "readwrite"); t.objectStore("docs").put({ name: doc.name, nr: doc.nr, pages: doc.pages, added: doc.added }); t.oncomplete = res; t.onerror = () => rej(t.error); }); return true; } catch (e) { return false; } }
+async function dbClear() { try { const d = await db(); await new Promise((res, rej) => { const t = d.transaction("docs", "readwrite"); t.objectStore("docs").clear(); t.oncomplete = res; t.onerror = () => rej(t.error); }); } catch (e) {} }
+
+function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = () => rej(new Error("pdf.js konnte nicht geladen werden")); document.head.appendChild(s); }); }
+let pdfReady = null;
+function pdfjs() {
+  if (!pdfReady) pdfReady = (async () => {
+    // Worker-Skript im Hauptthread laden: pdf.js nutzt dann globalThis.pdfjsWorker statt eines echten Workers.
+    await loadScript(PDFJS + "pdf.worker.min.js");
+    await loadScript(PDFJS + "pdf.min.js");
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js";
+    return window.pdfjsLib;
+  })().catch(e => { pdfReady = null; throw e; });
+  return pdfReady;
+}
+async function extract(file, onPage) {
+  const lib = await pdfjs();
+  const pdf = await lib.getDocument({ data: await file.arrayBuffer(), isEvalSupported: false, disableFontFace: true }).promise;
+  const pages = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const p = await pdf.getPage(i);
+    const tc = await p.getTextContent();
+    let s = "";
+    for (const it of tc.items) s += (it.str || "") + (it.hasEOL ? "\n" : " ");
+    // Silbentrennung am Zeilenende zusammenziehen, Leerraum vereinheitlichen
+    s = s.replace(/(\p{Ll})-\s*\n\s*(\p{Ll})/gu, "$1$2").replace(/\s+/g, " ").trim();
+    pages.push(s);
+    p.cleanup();
+    onPage(i, pdf.numPages);
+  }
+  await pdf.destroy();
+  return pages;
+}
+function prep(doc) { doc.n = doc.pages.map(norm); return doc; }
+
+async function filesFromDrop(dt) {
+  const entries = [...(dt.items || [])].map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+  if (!entries.length) return [...(dt.files || [])];
+  const out = [];
+  async function walk(e) {
+    if (e.isFile) out.push(await new Promise((res, rej) => e.file(res, rej)));
+    else if (e.isDirectory) { const r = e.createReader(); let batch; do { batch = await new Promise((res, rej) => r.readEntries(res, rej)); for (const x of batch) await walk(x); } while (batch.length); }
+  }
+  for (const e of entries) await walk(e);
+  return out;
+}
+
+function setMsg(m, err) { FT.msg = m; FT.err = err || ""; const el = document.getElementById("ftprog"); if (el) { el.textContent = m; el.className = "prog"; } const e2 = document.getElementById("fterr"); if (e2) { e2.textContent = FT.err; e2.hidden = !FT.err; } }
+
+async function addFiles(files) {
+  const list = [...files].filter(f => /\.pdf$/i.test(f.name) || f.type === "application/pdf");
+  if (!list.length) { setMsg("", "In der Auswahl war keine PDF-Datei."); return; }
+  if (FT.busy) return;
+  FT.busy = true;
+  const errors = [], skipped = [], empty = [];
+  let added = 0;
+  for (const [k, f] of list.entries()) {
+    if (FT.docs.some(d => d.name === f.name)) { skipped.push(f.name); continue; }
+    try {
+      const pages = await extract(f, (i, n) => setMsg(`Lese Datei ${k + 1} von ${list.length}: ${f.name} – Seite ${i} von ${n}`));
+      if (!pages.some(p => p.length > 20)) empty.push(f.name);
+      const doc = prep({ name: f.name, nr: nrFromName(f.name), pages, added: Date.now() });
+      await dbPut(doc);
+      FT.docs.push(doc);
+      added++;
+    } catch (e) { errors.push(f.name + " (" + (e && e.message ? e.message : "unlesbar") + ")"); }
+  }
+  FT.busy = false;
+  let m = `${added} ${added === 1 ? "Datei" : "Dateien"} aufgenommen.`;
+  if (skipped.length) m += ` ${skipped.length} schon im Index, übersprungen.`;
+  let err = "";
+  if (empty.length) err += `Kein Text gefunden (vermutlich eingescannt): ${empty.join(", ")}. `;
+  if (errors.length) err += `Nicht lesbar: ${errors.join(", ")}.`;
+  FT.msg = m; FT.err = err;
+  if (currentView() === "volltext") renderFT();
+}
+
+function parseTerms(raw) {
+  const terms = [];
+  raw.replace(/"([^"]+)"|(\S+)/g, (_, ph, w) => { const t = norm(ph || w).trim(); if (t.length > 1) terms.push(t); return ""; });
+  return terms;
+}
+function hlT(text, terms) {
+  let n = "", map = [];
+  for (let i = 0; i < text.length; i++) { const c = norm(text[i]); for (let j = 0; j < c.length; j++) { n += c[j]; map.push(i); } }
+  const marks = new Array(text.length).fill(false);
+  terms.forEach(t => { let p = n.indexOf(t); while (p !== -1) { for (let k = p; k < p + t.length; k++) marks[map[k]] = true; p = n.indexOf(t, p + 1); } });
+  let out = "", open = false;
+  for (let i = 0; i < text.length; i++) {
+    if (marks[i] && !open) { out += "<mark>"; open = true; }
+    if (!marks[i] && open) { out += "</mark>"; open = false; }
+    out += esc(text[i]);
+  }
+  return out + (open ? "</mark>" : "");
+}
+function snippet(page, terms) {
+  // Ausschnitt um die erste Fundstelle des ersten Suchbegriffs
+  let n = "", map = [];
+  for (let i = 0; i < page.length; i++) { const c = norm(page[i]); for (let j = 0; j < c.length; j++) { n += c[j]; map.push(i); } }
+  const p = n.indexOf(terms[0]);
+  const at = p >= 0 ? map[p] : 0;
+  let a = Math.max(0, at - 110), b = Math.min(page.length, at + 230);
+  while (a > 0 && page[a] !== " ") a--;
+  while (b < page.length && page[b] !== " ") b++;
+  return (a > 0 ? "… " : "") + hlT(page.slice(a, b).trim(), terms) + (b < page.length ? " …" : "");
+}
+function docMeta(d) { const l = llByNr[d.nr]; return { l, title: l ? l.t : d.name.replace(/\.pdf$/i, ""), url: l && l.pdf ? l.pdf : "" }; }
+
+function ftSearch() {
+  const box = document.getElementById("ftres");
+  if (!box) return;
+  const terms = parseTerms(state.q);
+  if (!FT.docs.length) { box.innerHTML = `<div class="empty">Noch keine PDFs im Index. Lade sie oben, dann durchsucht das Suchfeld ihren kompletten Text.</div>`; return; }
+  if (!terms.length) { box.innerHTML = `<div class="empty">Gib oben einen Suchbegriff ein. Mehrere Wörter müssen auf derselben Seite stehen; „Anführungszeichen“ suchen eine genaue Wortfolge, z.B. <b>"0,5 mg"</b>.</div>`; return; }
+  const res = [];
+  let pagesTotal = 0;
+  for (const d of FT.docs) {
+    const hits = [];
+    d.n.forEach((t, i) => { if (terms.every(x => t.includes(x))) hits.push(i); });
+    if (hits.length) { res.push({ d, hits }); pagesTotal += hits.length; }
+  }
+  res.sort((a, b) => b.hits.length - a.hits.length);
+  if (!res.length) { box.innerHTML = `<div class="reshead"><h2>Keine Treffer</h2></div><div class="empty">Keine Seite in ${FT.docs.length} Dokumenten enthält alle Suchbegriffe. Versuche weniger oder kürzere Wörter (z.B. Wortstamm „analges“).</div>`; return; }
+  box.innerHTML = `<div class="reshead"><h2>${pagesTotal} Seiten in ${res.length} von ${FT.docs.length} Dokumenten</h2><small>sortiert nach Trefferzahl</small></div>
+    <div class="list">${res.map(({ d, hits }) => {
+      const m = docMeta(d);
+      const all = FT.open[d.name];
+      const show = all ? hits : hits.slice(0, 4);
+      return `<article class="hitdoc">
+        <div class="ll-h">${m.l ? `<span class="kl ${m.l.k}">${m.l.k}</span>` : ""}<div class="t"><b>${esc(m.title)}</b>
+          <div class="meta">${m.l ? `<span class="nr">${m.l.nr}</span><span>${esc(m.l.fg)}</span>` : `<span>${esc(d.name)}</span>`}<span>${hits.length} ${hits.length === 1 ? "Seite" : "Seiten"} mit Treffer</span></div></div></div>
+        ${show.map(i => `<div class="hitpg">${m.url
+            ? `<a class="pg" href="${esc(m.url)}#page=${i + 1}" target="_blank" rel="noopener">Seite ${i + 1} im Original öffnen ↗</a>`
+            : `<span class="pg">Seite ${i + 1}${m.l ? ` · <a href="${REG(m.l.nr)}" target="_blank" rel="noopener">Registerseite ↗</a>` : " (lokale Datei)"}</span>`}
+          <p class="snip">${snippet(d.pages[i], terms)}</p></div>`).join("")}
+        ${hits.length > 4 ? `<button class="reset more" data-more="${esc(d.name)}">${all ? "weniger zeigen" : `alle ${hits.length} Seiten zeigen`}</button>` : ""}
+      </article>`;
+    }).join("")}</div>`;
+  box.querySelectorAll("[data-more]").forEach(b => b.addEventListener("click", () => { const k = b.dataset.more; FT.open[k] = !FT.open[k]; ftSearch(); }));
+}
+
+function renderFT() {
+  const have = new Set(FT.docs.map(d => d.nr).filter(Boolean));
+  const loaded = LL.filter(l => have.has(l.nr)).length;
+  const pageCount = FT.docs.reduce((s, d) => s + d.pages.length, 0);
+  const extra = FT.docs.filter(d => !llByNr[d.nr]);
+  view.innerHTML = `
+    <p class="notice"><strong>Volltextsuche über die kompletten Leitlinien.</strong> Die PDFs liest dein Browser selbst; ihr Text bleibt nur auf diesem Gerät gespeichert und wird nirgends hochgeladen. Treffer springen direkt auf die Seite im Originaldokument.</p>
+    <ol class="steps">
+      <li><b>PDFs herunterladen:</b> In der Liste unten jede Leitlinie öffnen und im PDF-Viewer speichern, alle in einen Ordner. Beim ersten Aufruf prüft das AWMF-Register kurz deinen Browser.</li>
+      <li><b>Ordner hier hineinziehen</b> oder die Dateien auswählen. Die Zuordnung zur Leitlinie läuft über die Registernummer im Dateinamen.</li>
+      <li><b>Oben suchen.</b> Der Index bleibt gespeichert, bis du ihn löschst.</li>
+    </ol>
+    <section class="drop" id="drop" aria-label="PDFs laden">
+      <b>PDFs hier ablegen</b>
+      <div class="row">
+        <label class="btn pdf" for="ftfiles">${ICON_DOC}Dateien wählen</label>
+        <input class="vh" type="file" id="ftfiles" accept="application/pdf,.pdf" multiple>
+        <label class="btn reg" for="ftdir">Ordner wählen</label>
+        <input class="vh" type="file" id="ftdir" webkitdirectory multiple>
+        ${FT.docs.length ? `<button class="reset" id="ftclear">Index löschen</button>` : ""}
+      </div>
+      <p class="prog" id="ftprog">${FT.busy ? esc(FT.msg) : FT.docs.length ? `${FT.docs.length} Dokumente mit ${pageCount.toLocaleString("de-DE")} Seiten im Index · ${loaded} von ${LL.length} Leitlinien zugeordnet${extra.length ? ` · ${extra.length} weitere Dateien` : ""}` : (FT.ready ? "Noch keine Dokumente im Index." : "Lese gespeicherten Index …")}${!FT.busy && FT.msg ? " · " + esc(FT.msg) : ""}</p>
+      <p class="prog err" id="fterr" ${FT.err ? "" : "hidden"}>${esc(FT.err)}</p>
+    </section>
+    <section id="ftres" aria-live="polite"></section>
+    <details class="dl" ${FT.docs.length ? "" : "open"}>
+      <summary>Download-Liste · ${loaded} von ${LL.length} geladen</summary>
+      ${LL.slice().sort((a, b) => (have.has(a.nr) - have.has(b.nr)) || a.t.localeCompare(b.t, "de")).map(l => `<div class="dlrow">
+        ${have.has(l.nr) ? `<span class="have">✓ im Index</span>` : `<span class="miss">fehlt</span>`}
+        <span class="tt">${esc(l.t)} <span class="nr">${l.nr}</span></span>
+        ${l.pdf ? `<a href="${esc(l.pdf)}" target="_blank" rel="noopener">PDF öffnen ↗</a>` : ""}
+        <a href="${REG(l.nr)}" target="_blank" rel="noopener">Registerseite ↗</a></div>`).join("")}
+    </details>`;
+  const drop = view.querySelector("#drop");
+  ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove("over")));
+  drop.addEventListener("drop", async e => { e.preventDefault(); addFiles(await filesFromDrop(e.dataTransfer)); });
+  view.querySelector("#ftfiles").addEventListener("change", e => addFiles(e.target.files));
+  view.querySelector("#ftdir").addEventListener("change", e => addFiles(e.target.files));
+  const clr = view.querySelector("#ftclear");
+  if (clr) clr.addEventListener("click", async () => {
+    if (clr.dataset.sure) { await dbClear(); FT.docs = []; FT.msg = "Index gelöscht."; FT.err = ""; renderFT(); }
+    else { clr.dataset.sure = "1"; clr.textContent = "Wirklich alle Dokumente aus dem Index löschen?"; }
+  });
+  ftSearch();
+}
+dbAll().then(docs => { FT.docs = docs.filter(d => d && Array.isArray(d.pages)).map(prep); FT.ready = true; if (currentView() === "volltext") renderFT(); });
+
 // ── Routing ──
 const view = document.getElementById("view");
 const q = document.getElementById("q");
-function currentView() { return location.hash === "#notfallbilder" ? "notfallbilder" : "suche"; }
+function currentView() { return location.hash === "#notfallbilder" ? "notfallbilder" : location.hash === "#volltext" ? "volltext" : "suche"; }
 function render() {
   const v = currentView();
   document.querySelectorAll(".views a").forEach(a => a.setAttribute("aria-current", a.dataset.view === v ? "page" : "false"));
-  v === "notfallbilder" ? renderNF() : renderSearch();
+  q.placeholder = v === "volltext" ? "Volltext: z.B. Adrenalin 0,5 mg, \"permissive Hypotension\" …" : "Freitext: Titel, Inhalt, Schlagwort, Registernummer …";
+  v === "notfallbilder" ? renderNF() : v === "volltext" ? renderFT() : renderSearch();
 }
 let t0;
-q.addEventListener("input", () => { clearTimeout(t0); t0 = setTimeout(() => { state.q = q.value.trim(); render(); }, 120); });
+q.addEventListener("input", () => { clearTimeout(t0); t0 = setTimeout(() => { state.q = q.value.trim(); currentView() === "volltext" ? ftSearch() : render(); }, currentView() === "volltext" ? 250 : 120); });
 window.addEventListener("hashchange", render);
 document.getElementById("count").textContent = LL.length + " Leitlinien · " + NF.length + " Notfallbilder";
 render();
