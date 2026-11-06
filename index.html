@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="AWMF-Leitlinien zu den Notfallbildern des Gemeinsamen Kompendiums Rettungsdienst 2026: Schlagwortsuche, Zuordnung nach Notfallbild und lokale Volltextsuche.">
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Leitlinien zum Kompendium</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: Begleitstück zum Kompendium – gleiche Leiste oben, Suche + Schlagwort-Chips, Treffer als Zeilen mit Klasse, Stand und zwei Sprunglinks ins Original. */
+:root {
+  --bg: #eef1f2;
+  --surface: #ffffff;
+  --ink: #16222b;
+  --muted: #56636c;
+  --line: #d4dadd;
+  --accent: #c2410c;
+  --accent-ink: #ffffff;
+  --accent-soft: #fde9df;
+  --warn: #8a5a00;
+  --warn-bg: #fff4d6;
+  --ok: #1d6b43;
+  --ok-bg: #e2f3e9;
+  --bad: #a11a1a;
+  --bad-bg: #fde4e4;
+  --bar: #1d2a33;
+  --bar-ink: #f2f5f6;
+  --mark: #ffe08a;
+  --f-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f151a; --surface: #182129; --ink: #e5ebee; --muted: #9aa8b1; --line: #2b3842;
+  --accent: #ff8a4c; --accent-ink: #1a0f08; --accent-soft: #3a2116;
+  --warn: #f4c560; --warn-bg: #33290f; --ok: #7fd6a3; --ok-bg: #15301f; --bad: #ff8d8d; --bad-bg: #3a1a1c;
+  --bar: #0a0f13; --bar-ink: #e5ebee; --mark: #6b4f00; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f151a; --surface: #182129; --ink: #e5ebee; --muted: #9aa8b1; --line: #2b3842;
+  --accent: #ff8a4c; --accent-ink: #1a0f08; --accent-soft: #3a2116;
+  --warn: #f4c560; --warn-bg: #33290f; --ok: #7fd6a3; --ok-bg: #15301f; --bad: #ff8d8d; --bad-bg: #3a1a1c;
+  --bar: #0a0f13; --bar-ink: #e5ebee; --mark: #6b4f00; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.5 var(--f-body); -webkit-text-size-adjust: 100%; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bar); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+a { color: inherit; }
+
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bar); color: var(--bar-ink);
+  padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top-in { max-width: 860px; margin: 0 auto; display: grid; gap: 10px; }
+.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.brand h1 { margin: 0; font: 700 1.4rem/1 var(--f-display); letter-spacing: .02em; text-transform: uppercase; text-wrap: balance; flex: 1 1 auto; }
+.brand h1 span { color: var(--accent); }
+.brand .count { font: 500 .8rem/1 var(--f-num); opacity: .8; }
+.search { width: 100%; border: 0; border-radius: 8px; padding: 12px 14px; background: #ffffff; color: #16222b; font-size: 1rem; }
+:root[data-theme="dark"] .search { background: #24303a; color: var(--ink); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .search { background: #24303a; color: var(--ink); } }
+.search::placeholder { color: #7b8890; }
+.views { display: flex; gap: 6px; flex-wrap: wrap; }
+.views a { text-decoration: none; font: 700 .9rem/1 var(--f-display); text-transform: uppercase; letter-spacing: .06em; padding: 8px 12px; border-radius: 999px; border: 1px solid #ffffff40; color: var(--bar-ink); }
+.views a[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+main { max-width: 860px; margin: 0 auto; padding-block: 16px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+main > * { min-width: 0; }
+.notice { font-size: .88rem; color: var(--muted); border-left: 4px solid var(--accent); padding: 8px 12px; background: var(--surface); border-radius: 0 8px 8px 0; }
+.notice strong { color: var(--ink); }
+
+.filters { display: grid; gap: 10px; }
+.frow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.flab { font: 700 .78rem/1 var(--f-display); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); min-width: 8.5ch; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px; cursor: pointer; font-size: .9rem; line-height: 1.2; }
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"] { background: var(--bar); color: var(--bar-ink); border-color: var(--bar); }
+.chip.sm { padding: 3px 9px; font-size: .8rem; }
+select.sel { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 8px 10px; max-width: 100%; min-width: 0; flex: 1 1 200px; width: 100%; }
+.toggle { display: inline-flex; gap: 8px; align-items: center; font-size: .9rem; cursor: pointer; }
+.toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
+.reset { background: none; border: 0; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 4px; font-size: .9rem; }
+
+.reshead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.reshead h2 { margin: 0; font: 700 1.05rem/1.2 var(--f-display); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.reshead small { color: var(--muted); font-size: .85rem; }
+
+.list { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.ll { background: var(--surface); padding: 14px 16px; display: grid; gap: 8px; min-width: 0; }
+.ll-h { display: flex; gap: 10px; align-items: flex-start; }
+.ll-h .t { flex: 1; min-width: 0; }
+.ll-h b { display: block; font-weight: 700; font-size: 1.05rem; line-height: 1.3; overflow-wrap: anywhere; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-size: .85rem; color: var(--muted); }
+.nr { font: 600 .82rem/1 var(--f-num); color: var(--ink); }
+.kl { font: 600 .75rem/1 var(--f-num); padding: 4px 7px; border-radius: 5px; background: var(--bg); border: 1px solid var(--line); color: var(--ink); flex: none; }
+.kl.S3 { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+.st { font: 700 .72rem/1 var(--f-body); padding: 4px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: .04em; }
+.st.ok { background: var(--ok-bg); color: var(--ok); }
+.st.warn { background: var(--warn-bg); color: var(--warn); }
+.st.bad { background: var(--bad-bg); color: var(--bad); }
+.desc { margin: 0; font-size: .95rem; overflow-wrap: anywhere; }
+.hint { margin: 0; font-size: .85rem; color: var(--warn); background: var(--warn-bg); border-radius: 6px; padding: 6px 10px; }
+.nfs { display: flex; flex-wrap: wrap; gap: 6px; }
+.nfs .chip { background: var(--accent-soft); border-color: transparent; }
+.tags { font-size: .8rem; color: var(--muted); overflow-wrap: anywhere; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; border-radius: 8px; padding: 8px 12px; font-weight: 700; font-size: .92rem; min-height: 40px; }
+.btn.pdf { background: var(--accent); color: var(--accent-ink); }
+.btn.reg { border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+.btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+mark { background: var(--mark); color: inherit; border-radius: 2px; padding: 0 1px; }
+.empty { color: var(--muted); padding: 24px 8px; text-align: center; background: var(--surface); border-radius: var(--r); border: 1px dashed var(--line); }
+
+/* Ansicht Notfallbilder */
+.cat { font: 700 1.05rem/1.2 var(--f-display); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 8px 0 0; }
+.nfrow { background: var(--surface); padding: 12px 16px; display: grid; gap: 8px; min-width: 0; }
+.nfrow-h { display: flex; gap: 10px; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
+.nfrow-h b { font-weight: 700; }
+.nfrow-h small { font: 500 .78rem/1 var(--f-num); color: var(--muted); }
+.nfll { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.nfll li { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; font-size: .92rem; min-width: 0; }
+.nfll li a { overflow-wrap: anywhere; }
+.nfll .nr { font-size: .75rem; color: var(--muted); }
+.gap { font-size: .88rem; color: var(--muted); font-style: italic; }
+.gap b { font-style: normal; color: var(--warn); }
+.cov { font: 700 .7rem/1 var(--f-num); padding: 3px 6px; border-radius: 4px; }
+.cov.d { background: var(--ok-bg); color: var(--ok); }
+.cov.t { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.cov.n { background: var(--warn-bg); color: var(--warn); }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: .85rem; color: var(--muted); align-items: center; }
+
+/* Ansicht Volltext */
+.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: .95rem; }
+.drop { border: 2px dashed var(--line); border-radius: var(--r); background: var(--surface); padding: 18px 16px; display: grid; gap: 10px; }
+.drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.drop b { font: 700 1.15rem/1.2 var(--f-display); text-transform: uppercase; letter-spacing: .04em; }
+.drop .row { display: flex; flex-wrap: wrap; gap: 8px; }
+.drop label.btn { cursor: pointer; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.prog { font: 500 .85rem/1.45 var(--f-num); color: var(--muted); overflow-wrap: anywhere; margin: 0; }
+.prog.err { color: var(--bad); }
+.dl { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 16px; }
+.dl summary { cursor: pointer; font: 700 1rem/1.4 var(--f-display); text-transform: uppercase; letter-spacing: .05em; }
+.dlrow { display: flex; gap: 8px 10px; align-items: baseline; flex-wrap: wrap; padding: 7px 0; border-top: 1px solid var(--line); font-size: .92rem; min-width: 0; }
+.dlrow:first-of-type { border-top: 0; }
+.dlrow .tt { flex: 1 1 240px; min-width: 0; overflow-wrap: anywhere; }
+.have { font: 700 .72rem/1 var(--f-num); padding: 3px 6px; border-radius: 4px; background: var(--ok-bg); color: var(--ok); }
+.miss { font: 700 .72rem/1 var(--f-num); padding: 3px 6px; border-radius: 4px; background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.hitdoc { background: var(--surface); padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+.hitpg { display: grid; gap: 3px; padding-left: 12px; border-left: 3px solid var(--accent-soft); min-width: 0; }
+.hitpg .pg { font: 600 .85rem/1.3 var(--f-num); color: var(--accent); justify-self: start; }
+.snip { margin: 0; font-size: .92rem; overflow-wrap: anywhere; color: var(--ink); }
+.more { justify-self: start; }
+footer { font-size: .82rem; color: var(--muted); display: grid; gap: 6px; }
+@media (prefers-reduced-motion: no-preference) { .chip, .btn { transition: background .12s, border-color .12s; } }
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <h1>Leitlinien zum <span>Kompendium</span></h1>
+      <span class="count" id="count"></span>
+    </div>
+    <input class="search" id="q" type="search" placeholder="Freitext: Titel, Inhalt, Schlagwort, Registernummer …" autocomplete="off" aria-label="Leitlinien durchsuchen">
+    <nav class="views" aria-label="Ansicht">
+      <a href="#suche" data-view="suche">Suche</a>
+      <a href="#notfallbilder" data-view="notfallbilder">Nach Notfallbild</a>
+      <a href="#volltext" data-view="volltext">Volltext</a>
+    </nav>
+  </div>
+</header>
+
+<main id="view"></main>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// Notfallbilder aus dem Gemeinsamen Kompendium Rettungsdienst 2026 (KP-Seiten)
+// ─────────────────────────────────────────────────────────────
+const NF = [
+ ["xabcde","Herangehensweise","Primary Survey – xABCDE","KP S. 81"],
+ ["secondary","Herangehensweise","Secondary Survey – OPQRST / SAMPLER","KP S. 82"],
+ ["schockraum","Herangehensweise","Schockraumalarmierung","KP S. 83–85"],
+ ["sinnhaft","Herangehensweise","Übergabe – SINNHAFT","KP S. 86–87"],
+ ["atemweg","Herangehensweise","Atemwegsmanagement","KP S. 88–89"],
+ ["niv","Herangehensweise","NIV / CPAP","KP S. 130"],
+ ["narkose","Herangehensweise","Narkose / Intubation – Vorbereitung","BH S. 70–71"],
+ ["als","Reanimation","Reanimation Erwachsene – ALS","KP S. 91–92"],
+ ["pls","Reanimation","Reanimation Kinder – PLS","KP S. 93–94"],
+ ["nbversorgung","Reanimation","Erstversorgung Neugeborener","KP S. 95–96"],
+ ["nls","Reanimation","Reanimation Neugeborene – NLS","KP S. 97–98"],
+ ["postrosc","Reanimation","Post-ROSC","KP S. 99"],
+ ["reversibel","Reanimation","Reversible Ursachen (4 H / HITS)","KP S. 92"],
+ ["dyspnoe","Leitsymptom","Dyspnoe","KP S. 103"],
+ ["tloc","Leitsymptom","Kurzzeitige Bewusstlosigkeit (TLOC)","KP S. 104"],
+ ["schmerz","Leitsymptom","Schmerzen und Analgesie","KP S. 105–112"],
+ ["opioidkarte","Leitsymptom","Notfallkarte Opioid-Überdosierung","KP S. 71"],
+ ["schock","Leitsymptom","Schock","KP S. 113"],
+ ["zns","Leitsymptom","Zentrales neurologisches Defizit / Bewusstseinsstörung","KP S. 114"],
+ ["fremdkoerper","Krankheitsbild","A-Problem bei Fremdkörperaspiration","KP S. 115"],
+ ["aproblem","Krankheitsbild","A-Problem beim Erwachsenen (obere Atemwegsobstruktion)","KP S. 116"],
+ ["aorta","Krankheitsbild","Akutes Aortensyndrom","KP S. 117"],
+ ["acs","Krankheitsbild","ACS / Brustschmerz","KP S. 118–120"],
+ ["anaphylaxie","Krankheitsbild","Anaphylaxie","KP S. 121–124"],
+ ["arteriell","Krankheitsbild","Akuter Verschluss peripherer Arterien","KP S. 125"],
+ ["tracheostoma","Krankheitsbild","Atemnot durch verlegtes Tracheostoma","KP S. 126–127"],
+ ["bronch","Krankheitsbild","Bronchialobstruktion (Asthma / COPD)","KP S. 128–130"],
+ ["dehydratation","Krankheitsbild","Dehydratation / Exsikkose","KP S. 131"],
+ ["geburt","Krankheitsbild","Geburtsbegleitung (ungeplant, außerklinisch)","KP S. 132–133"],
+ ["hitze","Krankheitsbild","Hitzeschaden","KP S. 134"],
+ ["hyperglyk","Krankheitsbild","Hyperglykämie","KP S. 135"],
+ ["hypertensiv","Krankheitsbild","Hypertensiver Notfall","KP S. 136–137"],
+ ["hypoglyk","Krankheitsbild","Hypoglykämie","KP S. 138–139"],
+ ["brady","Krankheitsbild","Instabile Bradykardie","KP S. 140"],
+ ["tachy","Krankheitsbild","Instabile Tachykardie","KP S. 141"],
+ ["intox","Krankheitsbild","Intoxikation","KP S. 142"],
+ ["lungenoedem","Krankheitsbild","Kardiales Lungenödem","KP S. 143–144"],
+ ["krampf_erw","Krankheitsbild","Krampfanfall Erwachsene","KP S. 145, 147–148"],
+ ["krampf_kind","Krankheitsbild","Krampfanfall Kind / Fieberkrampf","KP S. 146–148"],
+ ["lae","Krankheitsbild","Lungenarterienembolie","KP S. 149–150"],
+ ["krupp","Krankheitsbild","Obstruktion der oberen Atemwege – Säugling / Kleinkind","KP S. 151"],
+ ["stroke","Krankheitsbild","Schlaganfall","KP S. 152–153"],
+ ["sepsis","Krankheitsbild","Sepsis","KP S. 154–155"],
+ ["trauma","Trauma / MANV","Strukturierte Traumaversorgung","KP S. 157"],
+ ["btrauma","Trauma / MANV","B-Problem Trauma","KP S. 158"],
+ ["blutung","Trauma / MANV","Blutungskontrolle","KP S. 159"],
+ ["volumen","Trauma / MANV","Volumenmanagement Trauma / permissive Hypotension","KP S. 160"],
+ ["dtrauma","Trauma / MANV","D-Problem Trauma","KP S. 161"],
+ ["immo","Trauma / MANV","Immo-Ampel (Wirbelsäulenimmobilisation)","KP S. 162"],
+ ["thermisch","Trauma / MANV","Thermische Verletzungen","KP S. 163–164"],
+ ["rettung","Trauma / MANV","Patientenzentrierte Rettung (eingeklemmte Person)","KP S. 165–166"],
+ ["mstart","Trauma / MANV","MANV – Vorsichtung nach mSTaRT","KP S. 167–170"],
+ ["co","Trauma / MANV","Intoxikation mit Kohlenstoffmonoxid (CO)","KP S. 171–174"]
+].map(([id, cat, title, src]) => ({ id, cat, title, src }));
+
+// Notfallbilder ohne passende AWMF-Leitlinie: Hinweis auf die maßgeblichen Quellen außerhalb des AWMF-Registers
+const GAPS = {
+  als: "Maßgeblich sind die ERC/GRC-Reanimationsleitlinien (nicht im AWMF-Register).",
+  pls: "Maßgeblich sind die ERC/GRC-Reanimationsleitlinien (Paediatric Life Support).",
+  nls: "Maßgeblich sind die ERC/GRC-Leitlinien (Newborn Life Support).",
+  postrosc: "Maßgeblich sind die ERC/ESICM-Leitlinien zur Postreanimationsbehandlung.",
+  reversibel: "Maßgeblich sind die ERC/GRC-Reanimationsleitlinien.",
+  tloc: "Für Erwachsene: ESC-Leitlinie Synkope (Pocket-Leitlinie der DGK).",
+  acs: "Für das ACS: ESC-Leitlinie Akutes Koronarsyndrom (Pocket-Leitlinie der DGK).",
+  brady: "Maßgeblich sind ERC-Leitlinien (Periarrest-Arrhythmien) und ESC-Leitlinien.",
+  tachy: "Maßgeblich sind ERC-Leitlinien (Periarrest-Arrhythmien) und ESC-Leitlinien.",
+  opioidkarte: "Keine eigene AWMF-Leitlinie zur prähospitalen Opioid-Überdosierung gefunden.",
+  krupp: "Keine eigene AWMF-Leitlinie zum Krupp-Syndrom gefunden.",
+  tracheostoma: "Keine eigene AWMF-Leitlinie zum Tracheostoma-Notfall gefunden.",
+  mstart: "Sichtungskonzepte (mSTaRT) sind nicht AWMF-registriert.",
+  rettung: "Keine AWMF-Leitlinie zur technischen/patientenzentrierten Rettung gefunden.",
+  intox: "Keine allgemeine AWMF-Leitlinie zur Akutbehandlung von Vergiftungen gefunden; Giftinformationszentren nutzen.",
+  sinnhaft: "Übergabeschemata sind nicht AWMF-registriert.",
+  secondary: "Untersuchungsschemata sind nicht AWMF-registriert.",
+  xabcde: "Das xABCDE-Schema ist Teil der Polytrauma-Leitlinie, aber nicht eigens AWMF-registriert.",
+  dyspnoe: "Keine Leitsymptom-Leitlinie Dyspnoe; die Leitlinien zu den Ursachen siehe unten.",
+  hyperglyk: "Keine AWMF-Leitlinie speziell zur hyperglykämen Entgleisung bei Erwachsenen gefunden."
+};
+
+// ─────────────────────────────────────────────────────────────
+// Leitlinien (AWMF-Register). Stand/Status laut dem gefundenen Dokument, recherchiert 11/2026.
+// d = direkt zugeordnete Notfallbilder, t = teilweise relevant
+// ─────────────────────────────────────────────────────────────
+const LL = [
+{ nr:"001-028", t:"Atemwegsmanagement", k:"S1", fg:"DGAI", stand:"2023-09", s:"ok",
+  pdf:"https://register.awmf.org/assets/guideline_bkp/001-028l_S1_Atemwegsmanagement_2023-09.pdf",
+  d:["atemweg","narkose","tracheostoma"], tt:["aproblem","xabcde","krupp"],
+  tags:["Atemweg","Intubation","Larynxmaske","Supraglottische Atemwegshilfe","Videolaryngoskopie","Koniotomie","Präoxygenierung","Schwieriger Atemweg","Capnografie"],
+  x:"Konsensempfehlungen zum Freimachen und Sichern des Atemwegs bei Erwachsenen inkl. Algorithmus für den unerwartet schwierigen Atemweg, Front-of-Neck-Access und Extubation." },
+{ nr:"001-030", t:"Prähospitale Notfallnarkose beim Erwachsenen", k:"S1", fg:"DGAI", stand:"2015-03", s:"warn", sl:"verlängert",
+  pdf:"https://register.awmf.org/assets/guidelines/001-030l_S1_Praehospitale_Notfallnarkose_Erwachsene_2015-03-verlaengert.pdf",
+  d:["narkose"], tt:["atemweg","dtrauma","trauma"],
+  tags:["Notfallnarkose","RSI","Narkoseeinleitung","Präoxygenierung","Indikation Intubation","Monitoring","Notarzt"],
+  x:"Handlungsempfehlung zu Indikation, Vorbereitung, Durchführung und Überwachung der Narkose außerhalb der Klinik (z.B. Präoxygenierung, Standardmonitoring, Medikamente)." },
+{ nr:"001-036", t:"Management des erwartet schwierigen Atemwegs beim Kind", k:"S1", fg:"DGAI", stand:"2021-05", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/001-036l_S1_Management-des-erwartet-schwierigen-Atemwegs-beim-Kind_2021-05.pdf",
+  d:[], tt:["atemweg","krupp","fremdkoerper"],
+  tags:["Kinder","Pädiatrie","Schwieriger Atemweg","Intubation Kind","Atemweg Kind"],
+  x:"Anästhesiologische Empfehlungen zur Planung und Sicherung des schwierigen Atemwegs bei Kindern; für den Rettungsdienst vor allem als Hintergrundwissen." },
+{ nr:"020-021", t:"Sauerstoff in der Akuttherapie beim Erwachsenen", k:"S3", fg:"DGP", stand:"2021-06", s:"bad", sl:"abgelaufen, in Überarbeitung",
+  pdf:"https://register.awmf.org/assets/guidelines/020-021l_S3_Sauerstoff-in-der-Akuttherapie-beim-Erwachsenen_2021-06-abgelaufen.pdf",
+  d:["dyspnoe"], tt:["bronch","acs","stroke","postrosc","lungenoedem","niv","co","xabcde"],
+  tags:["Sauerstoff","O2","SpO2-Zielbereich","Hyperoxämie","Hypoxämie","Hyperkapnie","COPD","High-Flow","Präklinik"],
+  x:"Indikation und Dosierung von Sauerstoff bei akut kranken Erwachsenen in Klinik und Präklinik; Zielbereiche der Sättigung abhängig vom Hyperkapnierisiko." },
+{ nr:"020-004", t:"Nichtinvasive Beatmung als Therapie der akuten respiratorischen Insuffizienz", k:"S2k", fg:"DGP", stand:"2024-01", s:"ok",
+  pdf:"https://register.awmf.org/assets/guideline_bkp/020-004l_Nichtinvasive-Beatmung-Therapie-akute-respiratorische-Insuffizienz_2024-01.pdf",
+  d:["niv"], tt:["lungenoedem","bronch","dyspnoe"],
+  tags:["NIV","CPAP","Nichtinvasive Beatmung","Respiratorische Insuffizienz","Hyperkapnie","Lungenödem","COPD-Exazerbation","Präklinik"],
+  x:"Indikationen, Kontraindikationen und Durchführung der NIV bei akuter respiratorischer Insuffizienz, u.a. bei hyperkapnischer COPD-Exazerbation und kardialem Lungenödem, auch präklinisch." },
+{ nr:"187-023", t:"Polytrauma / Schwerverletzten-Behandlung", k:"S3", fg:"DGU", stand:"2023-06", s:"ok", sl:"Version 4.0; Version 5.0 in Arbeit",
+  pdf:"https://register.awmf.org/assets/guidelines/187-023l_S3_Polytrauma-Schwerverletzten-Behandlung_2023-06.pdf",
+  d:["trauma","btrauma","blutung","volumen","dtrauma","immo","schockraum"], tt:["xabcde","schock","narkose","rettung","schmerz"],
+  tags:["Polytrauma","Schwerverletzte","Präklinik","Schockraum","Tourniquet","Beckenschlinge","Entlastungspunktion","Spannungspneumothorax","Tranexamsäure","Permissive Hypotension","Immobilisation","Wirbelsäule","Schädel-Hirn-Trauma","Blutung","Gerinnung"],
+  x:"Zentrale Leitlinie zur Versorgung Schwerverletzter mit eigenen Kapiteln für die Präklinik und den Schockraum: Blutungskontrolle, Atemweg, Thoraxtrauma, Volumentherapie, Immobilisation, Analgesie, Zielklinik." },
+{ nr:"006-120", t:"Polytraumaversorgung im Kindesalter", k:"S2k", fg:"DGU / DGKCH", stand:"2021-02", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/006-120l_S2k_Polytraumaversorgung-im-Kindesalter_2021-02.pdf",
+  d:["trauma"], tt:["blutung","volumen","btrauma","dtrauma","immo","schockraum"],
+  tags:["Kinder","Pädiatrie","Polytrauma Kind","Präklinik","Schockraum","Kindertrauma"],
+  x:"Ergänzung zur Erwachsenen-Leitlinie für schwer verletzte Kinder: Präklinik, Schockraum und weitere klinische Versorgung (71 Leitsätze)." },
+{ nr:"008-001", t:"Schädelhirntrauma im Erwachsenenalter", k:"S2e", fg:"DGNC", stand:"2015-12", s:"bad", sl:"abgelaufen, in Überarbeitung",
+  pdf:"https://register.awmf.org/assets/guidelines/008-001l_S2e_Schaedelhirntrauma_SHT_Erwachsene_2015-12-abgelaufen.pdf",
+  d:["dtrauma"], tt:["trauma","zns","narkose"],
+  tags:["SHT","Schädel-Hirn-Trauma","GCS","Hirndruck","Pupillen","Bewusstlosigkeit","Antikoagulation","Kopfverletzung"],
+  x:"Versorgung des Schädelhirntraumas vom Unfallort bis zur Klinik: Einschätzung (GCS, Pupillen), Atemweg, Blutdruckziele, Transport und Bildgebung." },
+{ nr:"024-018", t:"Das Schädel-Hirn-Trauma im Kindes- und Jugendalter", k:"S2k", fg:"GNPI / DGKJ", stand:"2023-03", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/024-018l_S2k_Schaedel-Hirn-Trauma-Kinder-Jugendliche-SHT_2023-03.pdf",
+  d:["dtrauma"], tt:["trauma","zns"],
+  tags:["Kinder","Pädiatrie","SHT Kind","Schädel-Hirn-Trauma","GCS","Kopfverletzung"],
+  x:"Diagnostik und Behandlung des SHT bei Kindern und Jugendlichen, einschließlich Erstversorgung und Indikation zur Bildgebung." },
+{ nr:"001-020", t:"Intravasale Volumentherapie beim Erwachsenen", k:"S3", fg:"DGAI", stand:"2020-10", s:"warn", sl:"Gültigkeit bis 07/2025 – Status prüfen",
+  pdf:"https://register.awmf.org/assets/guidelines/001-020l_S3_Intravasale-Volumentherapie-Erwachsene_2020-10.pdf",
+  d:["schock","volumen"], tt:["dehydratation","sepsis","blutung"],
+  tags:["Volumentherapie","Volumenmangel","Kristalloide","Balancierte Lösung","Vollelektrolytlösung","Kolloide","HES","Schock","Hypovolämie","Infusion"],
+  x:"Diagnose des Volumenmangels und Wahl der Infusionslösung bei Erwachsenen; Empfehlungen zu balancierten Kristalloiden und Kolloiden." },
+{ nr:"040-016", t:"Intravenöse Infusionstherapie bei akut kranken Kindern jenseits der Neugeborenenperiode", k:"S2k", fg:"DIVI", stand:"2022-11", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/040-016l_S2k_Intravenoese_Fluessigkeitstherapie-bei-Kindern-jenseits-der-Neugeborenenperiode_2022-11.pdf",
+  d:["dehydratation"], tt:["schock","volumen","sepsis"],
+  tags:["Kinder","Pädiatrie","Infusion Kind","Volumentherapie","Dehydratation","Bolus","Vollelektrolytlösung"],
+  x:"Wahl und Dosierung intravenöser Flüssigkeit bei akut kranken Kindern ab der 5. Lebenswoche (u.a. Bolustherapie, isotone Lösungen)." },
+{ nr:"068-003", t:"Akute infektiöse Gastroenteritis im Säuglings-, Kindes- und Jugendalter", k:"S2k", fg:"GPGE", stand:"2024-07", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/068-003l_S2k_AGE-Akute-infektioese-Gastroenteritis-Saeuglinge-Kinder-Jugendliche-2024-07.pdf",
+  d:["dehydratation"], tt:[],
+  tags:["Kinder","Pädiatrie","Gastroenteritis","Durchfall","Erbrechen","Dehydratation","Exsikkose","Orale Rehydratation","Ondansetron"],
+  x:"Einschätzung des Dehydratationsgrades und Rehydratation (oral und intravenös) bei Kindern mit Gastroenteritis; medikamentöse Therapie und Hygiene." },
+{ nr:"001-025", t:"Behandlung akuter perioperativer und posttraumatischer Schmerzen", k:"S3", fg:"DGAI", stand:"2022-03", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/001-025l_S3_Behandlung-akuter-perioperativer-posttraumatischer-Schmerzen_2022-03.pdf",
+  d:["schmerz"], tt:["trauma","thermisch"],
+  tags:["Analgesie","Schmerz","Akutschmerz","Opioide","Fentanyl","Morphin","Ketamin","Esketamin","Paracetamol","Ibuprofen","NRS","Posttraumatisch"],
+  x:"Schmerzerfassung und multimodale Behandlung akuter Schmerzen nach Operation und Verletzung, einschließlich Opioiden und Nicht-Opioiden." },
+{ nr:"043-025", t:"Diagnostik, Therapie und Metaphylaxe der Urolithiasis", k:"S2k", fg:"DGU (Urologie)", stand:"2019-07", s:"bad", sl:"abgelaufen, in Überarbeitung",
+  pdf:"https://register.awmf.org/assets/guidelines/043-025l_S2k_Diagnostik_Therapie_Metaphylaxe_Urolithiasis_2019-07_1-abgelaufen.pdf",
+  d:[], tt:["schmerz"],
+  tags:["Nierenkolik","Harnleiterstein","Urolithiasis","Kolik","Butylscopolamin","Metamizol","NSAR","Flankenschmerz"],
+  x:"Analgesie der Nierenkolik und weitere Therapie; im Kompendium bei Butylscopolamin zitiert (dort: bei Nierenkolik nicht mehr angezeigt)." },
+{ nr:"061-025", t:"Akuttherapie und Management der Anaphylaxie", k:"S2k", fg:"DGAKI", stand:"2021-10", s:"warn", sl:"Überprüfung war für 2025 geplant – Status prüfen",
+  pdf:"https://register.awmf.org/assets/guidelines/061-025l_S2k_Akuttherapie-Management-Anaphylaxie_2021-10.pdf",
+  d:["anaphylaxie"], tt:["aproblem","schock","bronch"],
+  tags:["Anaphylaxie","Allergie","Adrenalin","Epinephrin i.m.","Antihistaminikum","Dimetinden","Prednisolon","Glukokortikoid","Schweregrad","Notfallset","Autoinjektor"],
+  x:"Diagnose nach klinischen Kriterien, Schweregradeinteilung, Akuttherapie (Adrenalin i.m. als Mittel der ersten Wahl, Volumen, Bronchodilatatoren, Antihistaminika, Glukokortikoide) und Nachsorge." },
+{ nr:"065-003", t:"Diagnostik, Therapie und Nachsorge der peripheren arteriellen Verschlusskrankheit", k:"S3", fg:"DGA", stand:"2024-11", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/065-003l_S3_Diagnostik-Therapie-Nachsorge-periphere-arterielle-Verschlusskrankheit_2024-11.pdf",
+  d:[], tt:["arteriell"],
+  tags:["pAVK","Akute Extremitätenischämie","Arterienverschluss","Embolie","Heparin","Ischämie","Bein"],
+  x:"Schwerpunkt chronische pAVK; die akute Extremitätenischämie wird nur am Rande behandelt." },
+{ nr:"004-034", t:"Typ-B-Aortendissektion", k:"S2k", fg:"DGG", stand:"2022-05", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/004-034l_S2k_Typ_B_Aortendissektion_2022-05.pdf",
+  d:["aorta"], tt:["acs"],
+  tags:["Aortendissektion","Typ B","Akutes Aortensyndrom","Blutdrucksenkung","TEVAR","Thoraxschmerz","Rückenschmerz"],
+  x:"Diagnostik und Therapie der akuten und chronischen Typ-B-Dissektion (unkompliziert, kompliziert, subakut)." },
+{ nr:"011-018", t:"Behandlung der thorakalen Aortendissektion Typ A", k:"S2k", fg:"DGTHG", stand:"2021-02", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/011-018l_S2k_Behandlung-der-thorakalen-Aortendissektion-Typ-A_2021-02_1.pdf",
+  d:["aorta"], tt:["acs"],
+  tags:["Aortendissektion","Typ A","Akutes Aortensyndrom","Herzchirurgie","Thoraxschmerz","Notfalloperation"],
+  x:"Diagnostik und operative Versorgung der Typ-A-Dissektion; für den Rettungsdienst relevant für Verdachtsdiagnose und Zielklinik." },
+{ nr:"053-023", t:"Brustschmerz – primärärztliche Versorgung", k:"S3", fg:"DEGAM", stand:"2025-07", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/053-023l_S3_Brustschmerz%E2%80%93primaeraerztliche-Versorgung_2025-07.pdf",
+  d:[], tt:["acs","aorta","lae"],
+  tags:["Brustschmerz","Thoraxschmerz","ACS","KHK","Marburger Herz-Score","Hausarzt","Differenzialdiagnose"],
+  x:"Abklärung von Brustschmerz in der Hausarztpraxis inkl. Erkennen abwendbar gefährlicher Verläufe (ACS, LAE, Aortendissektion)." },
+{ nr:"nvl-002", t:"Nationale VersorgungsLeitlinie Asthma", k:"S3", fg:"BÄK / KBV / AWMF", stand:"2024-08", s:"ok", sl:"Version 5.0",
+  pdf:"https://leitlinien.de/themen/asthma/pdf/asthma-vers5-lang.pdf",
+  d:["bronch"], tt:["dyspnoe"],
+  tags:["Asthma","Asthmaanfall","Status asthmaticus","Salbutamol","SABA","Ipratropiumbromid","Prednisolon","Glukokortikoid","Bronchialobstruktion","Kinder"],
+  x:"Langzeittherapie und Management des akuten Asthmaanfalls bei Erwachsenen und Kindern, inkl. Schweregradeinschätzung und Notfalltherapie." },
+{ nr:"nvl-003", t:"Nationale VersorgungsLeitlinie COPD", k:"S3", fg:"BÄK / KBV / AWMF", stand:"2024-12", s:"warn", sl:"Teilpublikation; Kapitel Exazerbation als Addendum 2024",
+  pdf:"https://register.awmf.org/assets/guidelines/nvl-003l_S3_COPD_2024-12.pdf",
+  d:["bronch"], tt:["dyspnoe","niv"],
+  tags:["COPD","Exazerbation","AECOPD","Bronchialobstruktion","Salbutamol","Ipratropiumbromid","Prednisolon","Sauerstoff","Hyperkapnie","NIV"],
+  x:"Diagnostik und Therapie der COPD; die Behandlung von Exazerbationen ist in einem eigenen Addendum (2024) ausgearbeitet." },
+{ nr:"nvl-006", t:"Nationale VersorgungsLeitlinie Chronische Herzinsuffizienz", k:"S3", fg:"BÄK / KBV / AWMF", stand:"2023-12", s:"ok", sl:"Version 4.0 (Kurzfassung)",
+  pdf:"https://www.leitlinien.de/themen/herzinsuffizienz/pdf/herzinsuffizienz-vers4-0-kurz.pdf",
+  d:[], tt:["lungenoedem"],
+  tags:["Herzinsuffizienz","Dekompensation","Lungenödem","Diuretika","Furosemid"],
+  x:"Schwerpunkt chronische Herzinsuffizienz; akute Dekompensation nur am Rande (Einweisungskriterien)." },
+{ nr:"nvl-009", t:"Nationale VersorgungsLeitlinie Hypertonie", k:"S3", fg:"BÄK / KBV / AWMF", stand:"2023-06", s:"ok", sl:"Version 1.0",
+  pdf:"https://www.leitlinien.de/themen/hypertonie/pdf/hypertonie-vers1-0-lang.pdf",
+  d:["hypertensiv"], tt:["stroke","aorta","acs","lungenoedem"],
+  tags:["Hypertonie","Hypertensiver Notfall","Hypertensive Entgleisung","Blutdruck","Urapidil","Organschaden"],
+  x:"Enthält einen eigenen Abschnitt zur hypertensiven Entgleisung bzw. zum hypertensiven Notfall (Abgrenzung über akute Organschäden, sofortige Einweisung)." },
+{ nr:"065-002", t:"Diagnostik und Therapie der Venenthrombose und der Lungenembolie", k:"S2k", fg:"DGA", stand:"2023-09", s:"ok", sl:"gültig bis 02/2028",
+  pdf:"https://register.awmf.org/assets/guidelines/065-002l_S2k_Venenthrombose-Lungenembolie_2023-09.pdf",
+  d:["lae"], tt:["dyspnoe","schock","acs"],
+  tags:["Lungenembolie","LAE","Venenthrombose","TVT","Heparin","Antikoagulation","Lyse","Wells-Score","Hämodynamische Instabilität"],
+  x:"Diagnostik (klinische Wahrscheinlichkeit, D-Dimer, Bildgebung) und Therapie von TVT und LAE einschließlich Risikostratifizierung und Lyse bei instabilen Patienten." },
+{ nr:"030-046", t:"Akuttherapie des ischämischen Schlaganfalls", k:"S2e", fg:"DGN", stand:"2022-11", s:"bad", sl:"abgelaufen, in Überarbeitung",
+  pdf:"https://register.awmf.org/assets/guidelines/030-046l_S2e_Akuttherapie-des-ischaemischen-Schlaganfalls_2022-11-abgelaufen.pdf",
+  d:["stroke"], tt:["zns","hypertensiv"],
+  tags:["Schlaganfall","Stroke","Ischämie","Thrombolyse","Thrombektomie","Stroke Unit","BE FAST","Zeitfenster","Blutdruck"],
+  x:"Akutbehandlung des ischämischen Schlaganfalls: Lyse, mechanische Thrombektomie, Blutdruckmanagement und Stroke-Unit-Versorgung." },
+{ nr:"030-002", t:"Behandlung von spontanen intrazerebralen Blutungen", k:"S2k", fg:"DGN", stand:"2025-01", s:"bad", sl:"abgelaufen, in Überarbeitung",
+  pdf:"https://register.awmf.org/assets/guidelines/030-002l_S2k_Behandlung-von-spontanen-intrazerebralen-Blutungen_2025-01-abgelaufen.pdf",
+  d:[], tt:["stroke","zns","hypertensiv"],
+  tags:["Hirnblutung","ICB","Intrazerebrale Blutung","Blutdrucksenkung","Antikoagulation","Gerinnung"],
+  x:"Blutdruckmanagement, Gerinnungsmanagement und operative Optionen bei spontanen intrazerebralen Blutungen." },
+{ nr:"030-079", t:"Status epilepticus im Erwachsenenalter", k:"S2k", fg:"DGN", stand:"2022-03", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/030-079l_S2k_Status_epilepticus_im_Erwachsenenalter_2022-03.pdf",
+  d:["krampf_erw"], tt:["zns"],
+  tags:["Status epilepticus","Krampfanfall","Epilepsie","Midazolam","Benzodiazepin","Levetiracetam","Stufentherapie"],
+  x:"Stufentherapie des Status epilepticus bei Erwachsenen, beginnend mit Benzodiazepinen in der Präklinik." },
+{ nr:"030-041", t:"Erster epileptischer Anfall und Epilepsien im Erwachsenenalter", k:"S2k", fg:"DGN", stand:"2023-09", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/030-041l_S2k_Erster-epileptischer-Anfall-Epilepsien-Erwachsenenalter_2023-09.pdf",
+  d:[], tt:["krampf_erw","tloc"],
+  tags:["Epilepsie","Erster Anfall","Krampfanfall","Synkope","Differenzialdiagnose"],
+  x:"Diagnostik nach einem ersten Anfall und Langzeittherapie; hilfreich zur Abgrenzung Anfall gegen Synkope." },
+{ nr:"022-019", t:"Therapie des konvulsiven Status epilepticus im Kindes- und Jugendalter", k:"S1", fg:"GNP", stand:"2026-01", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/022-019l_S1_Therapie-konvulsiver-Status-epilepticus-Kinder-Jugendliche_2026-01.pdf",
+  d:["krampf_kind"], tt:[],
+  tags:["Kinder","Pädiatrie","Status epilepticus","Krampfanfall Kind","Midazolam","Buccal","Nasal","Benzodiazepin"],
+  x:"Stufentherapie des konvulsiven Status epilepticus bei Kindern und Jugendlichen, ausdrücklich auch für Notärzte." },
+{ nr:"022-005", t:"Fieberkrämpfe im Kindesalter", k:"S1", fg:"GNP", stand:"2021-09", s:"bad", sl:"abgelaufen, in Überarbeitung",
+  pdf:"https://register.awmf.org/assets/guidelines/022-005l_S1_Fieberkraempfe-im-Kindesalter_2021-09-abgelaufen.pdf",
+  d:["krampf_kind"], tt:[],
+  tags:["Kinder","Pädiatrie","Fieberkrampf","Fieber","Krampfanfall Kind","Einfacher Fieberkrampf","Komplizierter Fieberkrampf"],
+  x:"Definition einfacher und komplizierter Fieberkrämpfe, Akuttherapie und Elternberatung." },
+{ nr:"023-004", t:"Synkope im Kindes- und Jugendalter", k:"S2k", fg:"DGPK", stand:"2025-03", s:"bad", sl:"abgelaufen, in Überarbeitung",
+  pdf:"https://register.awmf.org/assets/guidelines/023-004l_S2k_Synkope_im_Kindes-_und_Jugendalter_2025-03-abgelaufen.pdf",
+  d:["tloc"], tt:[],
+  tags:["Kinder","Pädiatrie","Synkope","TLOC","Bewusstlosigkeit","Kardiale Synkope","Vasovagal"],
+  x:"Abklärung von Synkopen bei Kindern und Jugendlichen mit Fokus auf Warnzeichen einer kardialen Ursache." },
+{ nr:"079-001", t:"Sepsis – Prävention, Diagnose, Therapie und Nachsorge", k:"S3", fg:"DSG", stand:"2025-07", s:"ok", sl:"Update 2025, Version 4.0",
+  pdf:"https://register.awmf.org/assets/guidelines/079-001l_S3_Sepsis-Praevention-Diagnose-Therapie-Nachsorge_2025-07.pdf",
+  d:["sepsis"], tt:["schock","volumen"],
+  tags:["Sepsis","Septischer Schock","qSOFA","Volumentherapie","Antibiotika","Vasopressoren","Noradrenalin","Laktat"],
+  x:"Update der deutschen Sepsis-Leitlinie für Erwachsene auf Basis der Surviving Sepsis Campaign 2021: Früherkennung, Volumen, Antibiotika, Vasopressoren und Nachsorge." },
+{ nr:"024-025", t:"Sepsis bei Kindern jenseits der Neonatalperiode", k:"S2k", fg:"GNPI", stand:"2016-04", s:"bad", sl:"abgelaufen, in Überarbeitung",
+  pdf:"https://register.awmf.org/assets/guidelines/024-025l_S2k_Sepsis_nach_Neonatalperiode_2016-04-abgelaufen.pdf",
+  d:["sepsis"], tt:["schock"],
+  tags:["Kinder","Pädiatrie","Sepsis Kind","Septischer Schock","Volumenbolus"],
+  x:"Diagnose und Therapie der Sepsis bei Kindern; Fassung von 2015, daher nur eingeschränkt verwendbar." },
+{ nr:"015-083", t:"Vaginale Geburt am Termin", k:"S3", fg:"DGGG / DGHWi", stand:"2021-03", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/015-083l_S3_Vaginale-Geburt-am-Termin_2021-03.pdf",
+  d:["geburt"], tt:["nbversorgung"],
+  tags:["Geburt","Entbindung","Schwangerschaft","Wehen","Nabelschnur","Abnabeln","Hebamme","Nachgeburtsphase"],
+  x:"Betreuung von Einlingsgeburten aus Schädellage am Termin, inkl. Austreibungs- und Nachgeburtsperiode und Abnabeln." },
+{ nr:"015-063", t:"Peripartale Blutungen, Diagnostik und Therapie", k:"S2k", fg:"DGGG", stand:"2022-09", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/015-063l_S2k_Peripartale_Blutungen_Diagnostik_Therapie_PPH_2022-09_2.pdf",
+  d:[], tt:["geburt","blutung","schock"],
+  tags:["Postpartale Blutung","PPH","Geburt","Uterusatonie","Oxytocin","Tranexamsäure","Blutung","Schwangerschaft"],
+  x:"Erkennung und Stufentherapie peripartaler Blutungen (z.B. Uterustonisierung, Tranexamsäure, Gerinnungsmanagement)." },
+{ nr:"015-018", t:"Hypertensive Erkrankungen in der Schwangerschaft (HES): Diagnostik und Therapie", k:"S2k", fg:"DGGG", stand:"2024-07", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/015-018l_S2k_Hypertensive-Erkrankungen-Schwangerschaft-HES-Diagnostik-Therapie_2024-07.pdf",
+  d:[], tt:["hypertensiv","geburt","krampf_erw"],
+  tags:["Präeklampsie","Eklampsie","HELLP","Schwangerschaft","Hypertonie Schwangerschaft","Magnesium","Krampfanfall Schwangerschaft"],
+  x:"Diagnostik und Therapie von Präeklampsie, Eklampsie und HELLP, inkl. Blutdrucksenkung und Eklampsieprophylaxe bzw. -therapie." },
+{ nr:"024-005", t:"Betreuung von Neugeborenen in der Geburtsklinik", k:"S2k", fg:"GNPI", stand:"2022-01", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/024-005l_S2k_Betreuung-von-Neugeborenen-in-der-Geburtsklinik_2022-01.pdf",
+  d:["nbversorgung"], tt:["geburt","nls"],
+  tags:["Neugeborenes","Erstversorgung","Wärmeerhalt","Abtrocknen","Absaugen","APGAR","Neonatologie"],
+  x:"Erstversorgung nach der Geburt (Abtrocknen, Wärmeerhalt, Absaugen, Überwachung der Anpassung) und weitere Betreuung des gesunden Neugeborenen." },
+{ nr:"001-031", t:"Interdisziplinäre Versorgung von Kindern nach Fremdkörperaspiration und Fremdkörperingestion", k:"S2k", fg:"DGAI", stand:"2016-01", s:"bad", sl:"abgelaufen; Neufassung 2024 möglich – Registerseite prüfen",
+  pdf:"https://register.awmf.org/assets/guidelines/001-031l_S2k_Fremdk%C3%B6rperversorgung_Kinder_2016-01-abgelaufen_01.pdf",
+  d:["fremdkoerper"], tt:["krupp","aproblem"],
+  tags:["Kinder","Pädiatrie","Fremdkörper","Aspiration","Verschlucken","Ingestion","Knopfbatterie","Bronchoskopie"],
+  x:"Vorgehen bei Fremdkörperaspiration und -ingestion im Kindesalter, von der Erstversorgung bis zur endoskopischen Entfernung." },
+{ nr:"044-001", t:"Behandlung thermischer Verletzungen im Erwachsenenalter", k:"S2k", fg:"DGV", stand:"2025-11", s:"ok", sl:"Version 8.0",
+  pdf:"https://register.awmf.org/assets/guidelines/044-001l_S2k_Behandlung-thermische-Verletzungen-Erwachsenen_2025-11.pdf",
+  d:["thermisch"], tt:["co","schmerz","volumen"],
+  tags:["Verbrennung","Verbrühung","Brandverletzung","VKOF","Neunerregel","Kühlung","Hypothermie","Inhalationstrauma","Volumentherapie","Zentrum für Schwerbrandverletzte"],
+  x:"Erstversorgung präklinisch (Kühlung, Wärmeerhalt, Ausdehnung), Volumentherapie, Inhalationstrauma, Wundbehandlung und Verlegungskriterien bei Erwachsenen." },
+{ nr:"006-128", t:"Behandlung thermischer Verletzungen im Kindesalter (Verbrennung, Verbrühung)", k:"S2k", fg:"DGKCH", stand:"2024-08", s:"ok",
+  pdf:"https://register.awmf.org/assets/guidelines/006-128l_S2K_Behandlung-thermische-Verletzungen-Kinder-Verbrennung-Verbruehung_2024-08.pdf",
+  d:["thermisch"], tt:["schmerz","volumen"],
+  tags:["Kinder","Pädiatrie","Verbrennung Kind","Verbrühung","VKOF","Kühlung","Analgesie Kind"],
+  x:"Erstversorgung, Analgesie, Flüssigkeitstherapie und Verlegungskriterien bei Verbrennungen und Verbrühungen im Kindesalter." },
+{ nr:"040-012", t:"Diagnostik und Therapie der Kohlenmonoxidvergiftung", k:"S2k", fg:"DIVI", stand:"2021-11", s:"warn", sl:"gültig bis 11/2026 – Status prüfen",
+  pdf:"https://register.awmf.org/assets/guidelines/040-012l_S2k_Diagnostik-Therapie-Kohlenmonoxidvergiftung_2021-11.pdf",
+  d:["co"], tt:["intox","thermisch","zns"],
+  tags:["Kohlenmonoxid","CO","CO-Vergiftung","COHb","Pulsoxymetrie","Sauerstoff","HBO","Druckkammer","Rauchgas","Eigenschutz","CO-Warner"],
+  x:"Erkennen, Diagnostik (COHb, Grenzen der Pulsoxymetrie) und Therapie der CO-Vergiftung mit Sauerstoff und hyperbarer Oxygenierung; Eigenschutz." },
+{ nr:"076-001", t:"Screening, Diagnose und Behandlung alkoholbezogener Störungen", k:"S3", fg:"DGPPN / DG-Sucht", stand:"2021-02", s:"warn", sl:"verlängert",
+  pdf:"https://register.awmf.org/assets/guideline_bkp/076-001l_S3-Screening-Diagnose-Behandlung-alkoholbezogene-Stoerungen_2021-02.pdf",
+  d:[], tt:["intox","krampf_erw","zns"],
+  tags:["Alkohol","Alkoholintoxikation","Entzug","Delir","Entzugsanfall","Thiamin","Benzodiazepin"],
+  x:"Schwerpunkt Screening, Entzugsbehandlung und Entwöhnung; zum Rettungsdienst passen vor allem die Abschnitte zu Entzug, Entzugsanfall und Delir." },
+{ nr:"053-052", t:"Hitzebedingte Gesundheitsstörungen in der hausärztlichen Praxis", k:"S1", fg:"DEGAM", stand:"2025-07", s:"bad", sl:"abgelaufen, in Überarbeitung",
+  pdf:"https://register.awmf.org/assets/guidelines/053-052l_S1_Hitzebedingte-Gesundheitsstoerungen-Hausarztpraxis_2025-07-abgelaufen.pdf",
+  d:["hitze"], tt:["dehydratation"],
+  tags:["Hitze","Hitzschlag","Hitzeerschöpfung","Sonnenstich","Kühlung","Körpertemperatur","Exsikkose","Ältere Menschen"],
+  x:"Unterscheidung von Hitzeerschöpfung und Hitzschlag (neurologische Symptome, Kerntemperatur über 40 °C), Akutmaßnahmen und Prävention." },
+{ nr:"057-013", t:"Therapie des Typ-1-Diabetes", k:"S3", fg:"DDG", stand:"2023-09", s:"ok", sl:"5. Auflage",
+  pdf:"",
+  d:["hypoglyk"], tt:["hyperglyk"],
+  tags:["Diabetes","Typ-1-Diabetes","Hypoglykämie","Glucose","Glucagon","Insulin","Ketoazidose"],
+  hint:"Für die aktuelle Langfassung fand ich keinen stabilen PDF-Link. Bitte über die Registerseite öffnen.",
+  x:"Insulintherapie bei Typ-1-Diabetes mit eigenem Kapitel zur Hypoglykämie (Erkennen und Behandlung, Glucagon)." },
+{ nr:"057-016", t:"Diagnostik, Therapie und Verlaufskontrolle des Diabetes mellitus im Kindes- und Jugendalter", k:"S3", fg:"DDG", stand:"", s:"warn", sl:"Status nicht geprüft",
+  pdf:"",
+  d:[], tt:["hyperglyk","hypoglyk"],
+  tags:["Kinder","Pädiatrie","Diabetes Kind","Ketoazidose","DKA","Hypoglykämie"],
+  hint:"Kein PDF-Link im Register gefunden. Bitte über die Registerseite öffnen.",
+  x:"Diabetes-Leitlinie für Kinder und Jugendliche, u.a. zur diabetischen Ketoazidose und Hypoglykämie." }
+];
+
+const REG = nr => "https://register.awmf.org/de/leitlinien/detail/" + nr;
+const nfById = Object.fromEntries(NF.map(n => [n.id, n]));
+
+// ── Suche ──
+function norm(s) {
+  return (s || "").toLowerCase()
+    .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[–—\/]/g, "-");
+}
+function searchText(l) {
+  const nfs = [...l.d, ...l.tt].map(id => nfById[id] ? nfById[id].title : "").join(" ");
+  return norm([l.nr, l.nr.replace("-", ""), l.t, l.k, l.fg, l.stand, l.x, l.tags.join(" "), nfs, l.sl || ""].join(" "));
+}
+LL.forEach(l => { l._s = searchText(l); });
+
+// Schlagworte: alle Tags mit Häufigkeit
+const TAGCOUNT = {};
+LL.forEach(l => l.tags.forEach(t => { TAGCOUNT[t] = (TAGCOUNT[t] || 0) + 1; }));
+const TOPTAGS = Object.keys(TAGCOUNT).filter(t => TAGCOUNT[t] >= 2).sort((a, b) => TAGCOUNT[b] - TAGCOUNT[a] || a.localeCompare(b, "de"));
+
+const state = { q: "", tags: new Set(), nf: "", kl: new Set(), hideOld: false, allTags: false };
+try { const s = JSON.parse(localStorage.getItem("ll-filter") || "null"); if (s) { state.hideOld = !!s.hideOld; } } catch (e) {}
+
+function matches(l) {
+  if (state.q) {
+    const terms = norm(state.q).split(/\s+/).filter(Boolean);
+    if (!terms.every(t => l._s.includes(t))) return false;
+  }
+  for (const t of state.tags) if (!l.tags.includes(t)) return false;
+  if (state.nf && !l.d.includes(state.nf) && !l.tt.includes(state.nf)) return false;
+  if (state.kl.size && !state.kl.has(l.k)) return false;
+  if (state.hideOld && l.s === "bad") return false;
+  return true;
+}
+function score(l) {
+  let s = 0;
+  if (state.nf && l.d.includes(state.nf)) s += 10;
+  if (state.q) {
+    const terms = norm(state.q).split(/\s+/).filter(Boolean);
+    const tt = norm(l.t), tg = norm(l.tags.join(" "));
+    terms.forEach(t => { if (tt.includes(t)) s += 5; if (tg.includes(t)) s += 3; if (norm(l.nr).includes(t)) s += 8; });
+  }
+  if (l.s === "ok") s += 1;
+  return s;
+}
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+// Treffer markieren, umlauttolerant: Zeichenweise normalisieren und Positionen zurückführen
+function hl(text) {
+  const terms = norm(state.q).split(/\s+/).filter(t => t.length > 1);
+  if (!terms.length) return esc(text);
+  let n = "", map = [];
+  for (let i = 0; i < text.length; i++) { const c = norm(text[i]); for (let j = 0; j < c.length; j++) { n += c[j]; map.push(i); } }
+  const marks = new Array(text.length).fill(false);
+  terms.forEach(t => { let p = n.indexOf(t); while (p !== -1) { for (let k = p; k < p + t.length; k++) marks[map[k]] = true; p = n.indexOf(t, p + 1); } });
+  let out = "", open = false;
+  for (let i = 0; i < text.length; i++) {
+    if (marks[i] && !open) { out += "<mark>"; open = true; }
+    if (!marks[i] && open) { out += "</mark>"; open = false; }
+    out += esc(text[i]);
+  }
+  return out + (open ? "</mark>" : "");
+}
+
+const ICON_DOC = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>';
+const ICON_EXT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
+const STLABEL = { ok: "aktuell", warn: "Status prüfen", bad: "abgelaufen" };
+
+function card(l) {
+  const nfChips = [...l.d.map(id => [id, true]), ...l.tt.map(id => [id, false])]
+    .filter(([id]) => nfById[id])
+    .map(([id, direct]) => `<button class="chip sm" data-nf="${id}" title="${direct ? "direkt zugeordnet" : "teilweise relevant"}">${direct ? "" : "≈ "}${esc(nfById[id].title)}</button>`).join("");
+  const stand = l.stand ? l.stand.split("-").reverse().join("/") : "–";
+  return `<article class="ll">
+    <div class="ll-h"><span class="kl ${l.k}">${l.k}</span><div class="t"><b>${hl(l.t)}</b>
+      <div class="meta"><span class="nr">${hl(l.nr)}</span><span>${hl(l.fg)}</span><span>Stand ${stand}</span>
+      <span class="st ${l.s}">${l.sl ? esc(l.sl) : STLABEL[l.s]}</span></div></div></div>
+    <p class="desc">${hl(l.x)}</p>
+    ${l.hint ? `<p class="hint">${esc(l.hint)}</p>` : ""}
+    ${nfChips ? `<div class="nfs" aria-label="Notfallbilder im Kompendium">${nfChips}</div>` : ""}
+    <div class="tags">Schlagworte: ${l.tags.map(hl).join(" · ")}</div>
+    <div class="links">
+      ${l.pdf ? `<a class="btn pdf" href="${esc(l.pdf)}" target="_blank" rel="noopener">${ICON_DOC}Originaldokument (PDF)</a>` : ""}
+      <a class="btn reg" href="${REG(l.nr)}" target="_blank" rel="noopener">${ICON_EXT}AWMF-Registerseite</a>
+    </div>
+  </article>`;
+}
+
+function saveFilter() { try { localStorage.setItem("ll-filter", JSON.stringify({ hideOld: state.hideOld })); } catch (e) {} }
+
+function renderSearch() {
+  const hits = LL.filter(matches).sort((a, b) => score(b) - score(a) || a.t.localeCompare(b.t, "de"));
+  const tagList = state.allTags ? Object.keys(TAGCOUNT).sort((a, b) => a.localeCompare(b, "de")) : TOPTAGS.slice(0, 24);
+  [...state.tags].forEach(t => { if (!tagList.includes(t)) tagList.unshift(t); });
+  const cats = [...new Set(NF.map(n => n.cat))];
+  const any = state.q || state.tags.size || state.nf || state.kl.size || state.hideOld;
+  view.innerHTML = `
+    <p class="notice"><strong>So funktioniert die Suche:</strong> Freitext durchsucht Titel, Kurzbeschreibung, Schlagworte, Registernummer und die zugeordneten Notfallbilder. Mehrere Wörter müssen alle vorkommen. Den kompletten Text der Leitlinien durchsuchst du in der Ansicht <a href="#volltext">Volltext</a>, nachdem du die PDFs dort geladen hast.</p>
+    <section class="filters" aria-label="Filter">
+      <div class="frow"><span class="flab">Notfallbild</span>
+        <select class="sel" id="nfsel" aria-label="Notfallbild aus dem Kompendium">
+          <option value="">Alle Notfallbilder</option>
+          ${cats.map(c => `<optgroup label="${esc(c)}">${NF.filter(n => n.cat === c).map(n => `<option value="${n.id}" ${state.nf === n.id ? "selected" : ""}>${esc(n.title)}</option>`).join("")}</optgroup>`).join("")}
+        </select></div>
+      <div class="frow"><span class="flab">Klasse</span>
+        ${["S3", "S2e", "S2k", "S1"].map(k => `<button class="chip" data-kl="${k}" aria-pressed="${state.kl.has(k)}">${k}</button>`).join("")}
+        <label class="toggle"><input type="checkbox" id="hideold" ${state.hideOld ? "checked" : ""}> abgelaufene ausblenden</label></div>
+      <div class="frow"><span class="flab">Schlagwort</span>
+        ${tagList.map(t => `<button class="chip sm" data-tag="${esc(t)}" aria-pressed="${state.tags.has(t)}">${esc(t)}</button>`).join("")}
+        <button class="reset" id="moretags">${state.allTags ? "weniger Schlagworte" : "alle " + Object.keys(TAGCOUNT).length + " Schlagworte"}</button></div>
+    </section>
+    <div class="reshead"><h2>${hits.length} von ${LL.length} Leitlinien</h2>${any ? `<button class="reset" id="reset">Filter zurücksetzen</button>` : `<small>sortiert nach Relevanz</small>`}</div>
+    ${hits.length ? `<div class="list">${hits.map(card).join("")}</div>` :
+      `<div class="empty">Keine Leitlinie passt zu dieser Kombination. Entferne einen Filter oder ein Suchwort${state.nf && GAPS[state.nf] ? `.<br><br>${esc(GAPS[state.nf])}` : "."}</div>`}
+    <footer>
+      <span>Status „abgelaufen“: Die AWMF kennzeichnet Leitlinien, die seit über fünf Jahren nicht aktualisiert wurden. Der Inhalt kann trotzdem noch der gängigen Praxis entsprechen; vor Verwendung die Registerseite prüfen.</span>
+      <span>PDF-Links zeigen auf die Datei, die bei der Recherche (11/2026) aktuell war. Erscheint eine neue Fassung, ändert das Register den Dateinamen; dann führt die Registerseite zur neuen Fassung.</span>
+    </footer>`;
+  wireSearch();
+}
+
+function wireSearch() {
+  view.querySelector("#nfsel").addEventListener("change", e => { state.nf = e.target.value; renderSearch(); });
+  view.querySelector("#hideold").addEventListener("change", e => { state.hideOld = e.target.checked; saveFilter(); renderSearch(); });
+  view.querySelector("#moretags").addEventListener("click", () => { state.allTags = !state.allTags; renderSearch(); });
+  const r = view.querySelector("#reset");
+  if (r) r.addEventListener("click", () => { state.q = ""; q.value = ""; state.tags.clear(); state.nf = ""; state.kl.clear(); state.hideOld = false; saveFilter(); renderSearch(); });
+  view.querySelectorAll("[data-kl]").forEach(b => b.addEventListener("click", () => { const k = b.dataset.kl; state.kl.has(k) ? state.kl.delete(k) : state.kl.add(k); renderSearch(); }));
+  view.querySelectorAll("[data-tag]").forEach(b => b.addEventListener("click", () => { const t = b.dataset.tag; state.tags.has(t) ? state.tags.delete(t) : state.tags.add(t); renderSearch(); }));
+  view.querySelectorAll("[data-nf]").forEach(b => b.addEventListener("click", () => { state.nf = b.dataset.nf; renderSearch(); window.scrollTo({ top: 0 }); }));
+}
+
+// ── Ansicht nach Notfallbild ──
+function renderNF() {
+  const cats = [...new Set(NF.map(n => n.cat))];
+  const qn = norm(state.q);
+  let html = `<p class="notice"><strong>Alle ${NF.length} Notfallbilder des Kompendiums</strong> mit den passenden AWMF-Leitlinien. Wo keine passt, steht die maßgebliche Quelle außerhalb des Registers. Ein Klick auf das Notfallbild zeigt die Leitlinien in der Suche.</p>
+    <div class="legend"><span class="cov d">direkt</span> Leitlinie behandelt das Notfallbild <span class="cov t">≈ teilweise</span> deckt Aspekte ab <span class="cov n">Lücke</span> keine AWMF-Leitlinie</div>`;
+  let shown = 0;
+  cats.forEach(c => {
+    const rows = NF.filter(n => n.cat === c).filter(n => {
+      if (!qn) return true;
+      const lls = LL.filter(l => l.d.includes(n.id) || l.tt.includes(n.id));
+      return norm(n.title).includes(qn) || lls.some(l => norm(l.t).includes(qn) || l.nr.includes(qn));
+    });
+    if (!rows.length) return;
+    shown += rows.length;
+    html += `<h2 class="cat">${esc(c)}</h2><div class="list">` + rows.map(n => {
+      const direct = LL.filter(l => l.d.includes(n.id));
+      const part = LL.filter(l => l.tt.includes(n.id));
+      const li = (l, d) => `<li><span class="cov ${d ? "d" : "t"}">${d ? "direkt" : "≈"}</span><a href="${esc(l.pdf || REG(l.nr))}" target="_blank" rel="noopener">${esc(l.t)}</a><span class="nr">${l.nr} · ${l.k}</span>${l.s === "bad" ? `<span class="st bad">abgelaufen</span>` : ""}</li>`;
+      const badge = direct.length ? "" : `<span class="cov n">Lücke</span>`;
+      return `<div class="nfrow"><div class="nfrow-h"><button class="chip" data-gonf="${n.id}"><b>${esc(n.title)}</b></button><small>${esc(n.src)} ${badge}</small></div>
+        ${direct.length || part.length ? `<ul class="nfll">${direct.map(l => li(l, true)).join("")}${part.map(l => li(l, false)).join("")}</ul>` : ""}
+        ${GAPS[n.id] ? `<div class="gap"><b>Hinweis:</b> ${esc(GAPS[n.id])}</div>` : ""}</div>`;
+    }).join("") + `</div>`;
+  });
+  if (!shown) html += `<div class="empty">Kein Notfallbild passt zu „${esc(state.q)}“.</div>`;
+  view.innerHTML = html;
+  view.querySelectorAll("[data-gonf]").forEach(b => b.addEventListener("click", () => { state.nf = b.dataset.gonf; state.q = ""; q.value = ""; location.hash = "suche"; }));
+}
+
+// ─────────────────────────────────────────────────────────────
+// Volltext: PDFs werden im Browser gelesen (pdf.js), der Text bleibt lokal in IndexedDB.
+// ─────────────────────────────────────────────────────────────
+const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+const ALIAS = { "asthma-vers5": "nvl-002", "herzinsuffizienz-vers4": "nvl-006", "hypertonie-vers1": "nvl-009" };
+const llByNr = Object.fromEntries(LL.map(l => [l.nr, l]));
+function nrFromName(name) {
+  const b = name.toLowerCase();
+  for (const k in ALIAS) if (b.includes(k)) return ALIAS[k];
+  const m = b.match(/(nvl-\d{3}|\d{3}-\d{3})/);
+  return m && llByNr[m[1]] ? m[1] : (m ? m[1] : "");
+}
+const FT = { docs: [], busy: false, msg: "", err: "", ready: false, open: {} };
+
+let dbP = null;
+function db() {
+  if (!dbP) dbP = new Promise((res, rej) => {
+    try { const r = indexedDB.open("ll-volltext", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("docs", { keyPath: "name" });
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+    } catch (e) { rej(e); }
+  });
+  return dbP;
+}
+async function dbAll() { try { const d = await db(); return await new Promise((res, rej) => { const r = d.transaction("docs").objectStore("docs").getAll(); r.onsuccess = () => res(r.result || []); r.onerror = () => rej(r.error); }); } catch (e) { return []; } }
+async function dbPut(doc) { try { const d = await db(); await new Promise((res, rej) => { const t = d.transaction("docs", "readwrite"); t.objectStore("docs").put({ name: doc.name, nr: doc.nr, pages: doc.pages, added: doc.added }); t.oncomplete = res; t.onerror = () => rej(t.error); }); return true; } catch (e) { return false; } }
+async function dbClear() { try { const d = await db(); await new Promise((res, rej) => { const t = d.transaction("docs", "readwrite"); t.objectStore("docs").clear(); t.oncomplete = res; t.onerror = () => rej(t.error); }); } catch (e) {} }
+
+function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = () => rej(new Error("pdf.js konnte nicht geladen werden")); document.head.appendChild(s); }); }
+let pdfReady = null;
+function pdfjs() {
+  if (!pdfReady) pdfReady = (async () => {
+    // Worker-Skript im Hauptthread laden: pdf.js nutzt dann globalThis.pdfjsWorker statt eines echten Workers.
+    await loadScript(PDFJS + "pdf.worker.min.js");
+    await loadScript(PDFJS + "pdf.min.js");
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js";
+    return window.pdfjsLib;
+  })().catch(e => { pdfReady = null; throw e; });
+  return pdfReady;
+}
+async function extract(file, onPage) {
+  const lib = await pdfjs();
+  const pdf = await lib.getDocument({ data: await file.arrayBuffer(), isEvalSupported: false, disableFontFace: true }).promise;
+  const pages = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const p = await pdf.getPage(i);
+    const tc = await p.getTextContent();
+    let s = "";
+    for (const it of tc.items) s += (it.str || "") + (it.hasEOL ? "\n" : " ");
+    // Silbentrennung am Zeilenende zusammenziehen, Leerraum vereinheitlichen
+    s = s.replace(/(\p{Ll})-\s*\n\s*(\p{Ll})/gu, "$1$2").replace(/\s+/g, " ").trim();
+    pages.push(s);
+    p.cleanup();
+    onPage(i, pdf.numPages);
+  }
+  await pdf.destroy();
+  return pages;
+}
+function prep(doc) { doc.n = doc.pages.map(norm); return doc; }
+
+async function filesFromDrop(dt) {
+  const entries = [...(dt.items || [])].map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+  if (!entries.length) return [...(dt.files || [])];
+  const out = [];
+  async function walk(e) {
+    if (e.isFile) out.push(await new Promise((res, rej) => e.file(res, rej)));
+    else if (e.isDirectory) { const r = e.createReader(); let batch; do { batch = await new Promise((res, rej) => r.readEntries(res, rej)); for (const x of batch) await walk(x); } while (batch.length); }
+  }
+  for (const e of entries) await walk(e);
+  return out;
+}
+
+function setMsg(m, err) { FT.msg = m; FT.err = err || ""; const el = document.getElementById("ftprog"); if (el) { el.textContent = m; el.className = "prog"; } const e2 = document.getElementById("fterr"); if (e2) { e2.textContent = FT.err; e2.hidden = !FT.err; } }
+
+async function addFiles(files) {
+  const list = [...files].filter(f => /\.pdf$/i.test(f.name) || f.type === "application/pdf");
+  if (!list.length) { setMsg("", "In der Auswahl war keine PDF-Datei."); return; }
+  if (FT.busy) return;
+  FT.busy = true;
+  const errors = [], skipped = [], empty = [];
+  let added = 0;
+  for (const [k, f] of list.entries()) {
+    if (FT.docs.some(d => d.name === f.name)) { skipped.push(f.name); continue; }
+    try {
+      const pages = await extract(f, (i, n) => setMsg(`Lese Datei ${k + 1} von ${list.length}: ${f.name} – Seite ${i} von ${n}`));
+      if (!pages.some(p => p.length > 20)) empty.push(f.name);
+      const doc = prep({ name: f.name, nr: nrFromName(f.name), pages, added: Date.now() });
+      await dbPut(doc);
+      FT.docs.push(doc);
+      added++;
+    } catch (e) { errors.push(f.name + " (" + (e && e.message ? e.message : "unlesbar") + ")"); }
+  }
+  FT.busy = false;
+  let m = `${added} ${added === 1 ? "Datei" : "Dateien"} aufgenommen.`;
+  if (skipped.length) m += ` ${skipped.length} schon im Index, übersprungen.`;
+  let err = "";
+  if (empty.length) err += `Kein Text gefunden (vermutlich eingescannt): ${empty.join(", ")}. `;
+  if (errors.length) err += `Nicht lesbar: ${errors.join(", ")}.`;
+  FT.msg = m; FT.err = err;
+  if (currentView() === "volltext") renderFT();
+}
+
+function parseTerms(raw) {
+  const terms = [];
+  raw.replace(/"([^"]+)"|(\S+)/g, (_, ph, w) => { const t = norm(ph || w).trim(); if (t.length > 1) terms.push(t); return ""; });
+  return terms;
+}
+function hlT(text, terms) {
+  let n = "", map = [];
+  for (let i = 0; i < text.length; i++) { const c = norm(text[i]); for (let j = 0; j < c.length; j++) { n += c[j]; map.push(i); } }
+  const marks = new Array(text.length).fill(false);
+  terms.forEach(t => { let p = n.indexOf(t); while (p !== -1) { for (let k = p; k < p + t.length; k++) marks[map[k]] = true; p = n.indexOf(t, p + 1); } });
+  let out = "", open = false;
+  for (let i = 0; i < text.length; i++) {
+    if (marks[i] && !open) { out += "<mark>"; open = true; }
+    if (!marks[i] && open) { out += "</mark>"; open = false; }
+    out += esc(text[i]);
+  }
+  return out + (open ? "</mark>" : "");
+}
+function snippet(page, terms) {
+  // Ausschnitt um die erste Fundstelle des ersten Suchbegriffs
+  let n = "", map = [];
+  for (let i = 0; i < page.length; i++) { const c = norm(page[i]); for (let j = 0; j < c.length; j++) { n += c[j]; map.push(i); } }
+  const p = n.indexOf(terms[0]);
+  const at = p >= 0 ? map[p] : 0;
+  let a = Math.max(0, at - 110), b = Math.min(page.length, at + 230);
+  while (a > 0 && page[a] !== " ") a--;
+  while (b < page.length && page[b] !== " ") b++;
+  return (a > 0 ? "… " : "") + hlT(page.slice(a, b).trim(), terms) + (b < page.length ? " …" : "");
+}
+function docMeta(d) { const l = llByNr[d.nr]; return { l, title: l ? l.t : d.name.replace(/\.pdf$/i, ""), url: l && l.pdf ? l.pdf : "" }; }
+
+function ftSearch() {
+  const box = document.getElementById("ftres");
+  if (!box) return;
+  const terms = parseTerms(state.q);
+  if (!FT.docs.length) { box.innerHTML = `<div class="empty">Noch keine PDFs im Index. Lade sie oben, dann durchsucht das Suchfeld ihren kompletten Text.</div>`; return; }
+  if (!terms.length) { box.innerHTML = `<div class="empty">Gib oben einen Suchbegriff ein. Mehrere Wörter müssen auf derselben Seite stehen; „Anführungszeichen“ suchen eine genaue Wortfolge, z.B. <b>"0,5 mg"</b>.</div>`; return; }
+  const res = [];
+  let pagesTotal = 0;
+  for (const d of FT.docs) {
+    const hits = [];
+    d.n.forEach((t, i) => { if (terms.every(x => t.includes(x))) hits.push(i); });
+    if (hits.length) { res.push({ d, hits }); pagesTotal += hits.length; }
+  }
+  res.sort((a, b) => b.hits.length - a.hits.length);
+  if (!res.length) { box.innerHTML = `<div class="reshead"><h2>Keine Treffer</h2></div><div class="empty">Keine Seite in ${FT.docs.length} Dokumenten enthält alle Suchbegriffe. Versuche weniger oder kürzere Wörter (z.B. Wortstamm „analges“).</div>`; return; }
+  box.innerHTML = `<div class="reshead"><h2>${pagesTotal} Seiten in ${res.length} von ${FT.docs.length} Dokumenten</h2><small>sortiert nach Trefferzahl</small></div>
+    <div class="list">${res.map(({ d, hits }) => {
+      const m = docMeta(d);
+      const all = FT.open[d.name];
+      const show = all ? hits : hits.slice(0, 4);
+      return `<article class="hitdoc">
+        <div class="ll-h">${m.l ? `<span class="kl ${m.l.k}">${m.l.k}</span>` : ""}<div class="t"><b>${esc(m.title)}</b>
+          <div class="meta">${m.l ? `<span class="nr">${m.l.nr}</span><span>${esc(m.l.fg)}</span>` : `<span>${esc(d.name)}</span>`}<span>${hits.length} ${hits.length === 1 ? "Seite" : "Seiten"} mit Treffer</span></div></div></div>
+        ${show.map(i => `<div class="hitpg">${m.url
+            ? `<a class="pg" href="${esc(m.url)}#page=${i + 1}" target="_blank" rel="noopener">Seite ${i + 1} im Original öffnen ↗</a>`
+            : `<span class="pg">Seite ${i + 1}${m.l ? ` · <a href="${REG(m.l.nr)}" target="_blank" rel="noopener">Registerseite ↗</a>` : " (lokale Datei)"}</span>`}
+          <p class="snip">${snippet(d.pages[i], terms)}</p></div>`).join("")}
+        ${hits.length > 4 ? `<button class="reset more" data-more="${esc(d.name)}">${all ? "weniger zeigen" : `alle ${hits.length} Seiten zeigen`}</button>` : ""}
+      </article>`;
+    }).join("")}</div>`;
+  box.querySelectorAll("[data-more]").forEach(b => b.addEventListener("click", () => { const k = b.dataset.more; FT.open[k] = !FT.open[k]; ftSearch(); }));
+}
+
+function renderFT() {
+  const have = new Set(FT.docs.map(d => d.nr).filter(Boolean));
+  const loaded = LL.filter(l => have.has(l.nr)).length;
+  const pageCount = FT.docs.reduce((s, d) => s + d.pages.length, 0);
+  const extra = FT.docs.filter(d => !llByNr[d.nr]);
+  view.innerHTML = `
+    <p class="notice"><strong>Volltextsuche über die kompletten Leitlinien.</strong> Die PDFs liest dein Browser selbst; ihr Text bleibt nur auf diesem Gerät gespeichert und wird nirgends hochgeladen. Treffer springen direkt auf die Seite im Originaldokument.</p>
+    <ol class="steps">
+      <li><b>PDFs herunterladen:</b> In der Liste unten jede Leitlinie öffnen und im PDF-Viewer speichern, alle in einen Ordner. Beim ersten Aufruf prüft das AWMF-Register kurz deinen Browser.</li>
+      <li><b>Ordner hier hineinziehen</b> oder die Dateien auswählen. Die Zuordnung zur Leitlinie läuft über die Registernummer im Dateinamen.</li>
+      <li><b>Oben suchen.</b> Der Index bleibt gespeichert, bis du ihn löschst.</li>
+    </ol>
+    <section class="drop" id="drop" aria-label="PDFs laden">
+      <b>PDFs hier ablegen</b>
+      <div class="row">
+        <label class="btn pdf" for="ftfiles">${ICON_DOC}Dateien wählen</label>
+        <input class="vh" type="file" id="ftfiles" accept="application/pdf,.pdf" multiple>
+        <label class="btn reg" for="ftdir">Ordner wählen</label>
+        <input class="vh" type="file" id="ftdir" webkitdirectory multiple>
+        ${FT.docs.length ? `<button class="reset" id="ftclear">Index löschen</button>` : ""}
+      </div>
+      <p class="prog" id="ftprog">${FT.busy ? esc(FT.msg) : FT.docs.length ? `${FT.docs.length} Dokumente mit ${pageCount.toLocaleString("de-DE")} Seiten im Index · ${loaded} von ${LL.length} Leitlinien zugeordnet${extra.length ? ` · ${extra.length} weitere Dateien` : ""}` : (FT.ready ? "Noch keine Dokumente im Index." : "Lese gespeicherten Index …")}${!FT.busy && FT.msg ? " · " + esc(FT.msg) : ""}</p>
+      <p class="prog err" id="fterr" ${FT.err ? "" : "hidden"}>${esc(FT.err)}</p>
+    </section>
+    <section id="ftres" aria-live="polite"></section>
+    <details class="dl" ${FT.docs.length ? "" : "open"}>
+      <summary>Download-Liste · ${loaded} von ${LL.length} geladen</summary>
+      ${LL.slice().sort((a, b) => (have.has(a.nr) - have.has(b.nr)) || a.t.localeCompare(b.t, "de")).map(l => `<div class="dlrow">
+        ${have.has(l.nr) ? `<span class="have">✓ im Index</span>` : `<span class="miss">fehlt</span>`}
+        <span class="tt">${esc(l.t)} <span class="nr">${l.nr}</span></span>
+        ${l.pdf ? `<a href="${esc(l.pdf)}" target="_blank" rel="noopener">PDF öffnen ↗</a>` : ""}
+        <a href="${REG(l.nr)}" target="_blank" rel="noopener">Registerseite ↗</a></div>`).join("")}
+    </details>`;
+  const drop = view.querySelector("#drop");
+  ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove("over")));
+  drop.addEventListener("drop", async e => { e.preventDefault(); addFiles(await filesFromDrop(e.dataTransfer)); });
+  view.querySelector("#ftfiles").addEventListener("change", e => addFiles(e.target.files));
+  view.querySelector("#ftdir").addEventListener("change", e => addFiles(e.target.files));
+  const clr = view.querySelector("#ftclear");
+  if (clr) clr.addEventListener("click", async () => {
+    if (clr.dataset.sure) { await dbClear(); FT.docs = []; FT.msg = "Index gelöscht."; FT.err = ""; renderFT(); }
+    else { clr.dataset.sure = "1"; clr.textContent = "Wirklich alle Dokumente aus dem Index löschen?"; }
+  });
+  ftSearch();
+}
+dbAll().then(docs => { FT.docs = docs.filter(d => d && Array.isArray(d.pages)).map(prep); FT.ready = true; if (currentView() === "volltext") renderFT(); });
+
+// ── Routing ──
+const view = document.getElementById("view");
+const q = document.getElementById("q");
+function currentView() { return location.hash === "#notfallbilder" ? "notfallbilder" : location.hash === "#volltext" ? "volltext" : "suche"; }
+function render() {
+  const v = currentView();
+  document.querySelectorAll(".views a").forEach(a => a.setAttribute("aria-current", a.dataset.view === v ? "page" : "false"));
+  q.placeholder = v === "volltext" ? "Volltext: z.B. Adrenalin 0,5 mg, \"permissive Hypotension\" …" : "Freitext: Titel, Inhalt, Schlagwort, Registernummer …";
+  v === "notfallbilder" ? renderNF() : v === "volltext" ? renderFT() : renderSearch();
+}
+let t0;
+q.addEventListener("input", () => { clearTimeout(t0); t0 = setTimeout(() => { state.q = q.value.trim(); currentView() === "volltext" ? ftSearch() : render(); }, currentView() === "volltext" ? 250 : 120); });
+window.addEventListener("hashchange", render);
+document.getElementById("count").textContent = LL.length + " Leitlinien · " + NF.length + " Notfallbilder";
+render();
+</script>
+
+</body>
+</html>
